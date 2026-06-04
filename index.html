@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Личный планер</title>
+<title>Atlas — держи курс</title>
 <style>
 :root{
   --bg:#ffffff;--bg2:#f8f8f6;--bg3:#f1f0ec;--bg4:#e9e8e3;
@@ -329,8 +329,8 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 <div class="app">
   <div class="app-header">
     <div>
-      <div class="app-title">📓 Личный планер</div>
-      <div class="app-sub">Календарь · Привычки · Задачи · Пространство · Напоминания</div>
+      <div class="app-title">🧭 Atlas</div>
+      <div class="app-sub">Держи курс. Календарь · Привычки · Задачи · Пространство · Напоминания.</div>
     </div>
     <div class="header-actions">
       <button class="icon-btn-sm" onclick="requestNotificationPermission()" id="notif-btn" title="Включить уведомления">🔔</button>
@@ -462,14 +462,15 @@ function freshDB(){
     ],
     workspace: {
       pages: [
-        {id:'p-welcome',parentId:null,title:'Добро пожаловать',icon:'👋',
+        {id:'p-welcome',parentId:null,title:'Добро пожаловать в Atlas',icon:'🧭',
           blocks:[
-            {id:uid(),type:'h1',content:'Это твоё пространство'},
-            {id:uid(),type:'p',content:'Здесь как в Notion: создавай страницы слева, добавляй блоки внизу. Текст можно редактировать прямо тут (клик и пиши).'},
-            {id:uid(),type:'h2',content:'Что можно делать'},
-            {id:uid(),type:'todo',content:'Записывать идеи и заметки',checked:false},
-            {id:uid(),type:'todo',content:'Создавать чек-листы',checked:true},
-            {id:uid(),type:'todo',content:'Делать страницы внутри страниц',checked:false},
+            {id:uid(),type:'h1',content:'Держи курс'},
+            {id:uid(),type:'p',content:'Atlas — твоё пространство для жизни и работы. Календарь, привычки, задачи, заметки и напоминания в одном месте. Никаких подписок, всё твоё.'},
+            {id:uid(),type:'h2',content:'С чего начать'},
+            {id:uid(),type:'todo',content:'Добавить первое событие в календарь',checked:false},
+            {id:uid(),type:'todo',content:'Завести привычку, к которой давно хотел вернуться',checked:false},
+            {id:uid(),type:'todo',content:'Поставить задачу на сегодня',checked:false},
+            {id:uid(),type:'todo',content:'Создать страницу здесь, в пространстве',checked:true},
             {id:uid(),type:'quote',content:'Лучший способ предсказать будущее — создать его.'},
           ],
           created:now,updated:now},
@@ -1885,7 +1886,7 @@ async function requestNotificationPermission(){
 }
 function testNotification(){
   if(Notification.permission==='granted'){
-    new Notification('Тест', {body:'Уведомления работают 🎉', icon:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" font-size="80">📓</text></svg>'});
+    new Notification('Atlas', {body:'Уведомления работают 🎉', icon:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" font-size="80">🧭</text></svg>'});
   }
 }
 
@@ -1943,7 +1944,7 @@ function rescheduleNotifications(){
     if(ms <= 0) return;
     const id = setTimeout(() => {
       try{
-        new Notification(item.title, {body:item.body, icon:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" font-size="80">📓</text></svg>'});
+        new Notification(item.title, {body:item.body, icon:'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" font-size="80">🧭</text></svg>'});
       }catch(e){}
     }, ms);
     scheduledTimeouts.push(id);
