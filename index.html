@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Atlas — держи курс</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --bg:#ffffff;--bg2:#f8f8f6;--bg3:#f1f0ec;--bg4:#e9e8e3;
@@ -312,6 +313,25 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .setting-label{font-size:14px;font-weight:500}
 .setting-desc{font-size:11px;color:var(--text2);margin-top:2px}
 
+/* AUTH SCREEN */
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg3)}
+.auth-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px 32px;max-width:380px;width:100%;box-shadow:var(--shadow-lg)}
+.auth-logo{font-size:42px;text-align:center;margin-bottom:6px}
+.auth-title{font-size:24px;font-weight:700;text-align:center;letter-spacing:-.01em}
+.auth-sub{font-size:13px;color:var(--text2);text-align:center;margin-top:6px;margin-bottom:24px}
+.auth-tabs{display:flex;gap:2px;background:var(--bg3);border-radius:var(--radius);padding:3px;margin-bottom:20px}
+.auth-tabs button{flex:1;padding:8px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--text2);border-radius:6px;cursor:pointer}
+.auth-tabs button.active{background:var(--bg);color:var(--text);box-shadow:var(--shadow)}
+.auth-msg{padding:10px 12px;border-radius:var(--radius);font-size:12px;margin-bottom:12px}
+.auth-msg.err{background:var(--red-bg);color:var(--red-text)}
+.auth-msg.ok{background:var(--teal-bg);color:var(--teal-text)}
+.auth-guest{display:block;margin-top:18px;text-align:center;color:var(--text3);font-size:12px;text-decoration:underline;cursor:pointer;background:transparent;border:none;width:100%}
+.auth-guest:hover{color:var(--text2)}
+.auth-footer{text-align:center;font-size:11px;color:var(--text3);margin-top:24px}
+.sync-status{font-size:11px;color:var(--text3);padding:4px 8px}
+.sync-status.syncing{color:var(--blue-text)}
+.sync-status.error{color:var(--red-text)}
+
 @media(max-width:760px){
   .app{padding:12px 10px 80px}
   .mg-day{min-height:70px}
@@ -326,7 +346,39 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 </style>
 </head>
 <body>
-<div class="app">
+
+<!-- AUTH SCREEN (shown until user signs in or chooses guest mode) -->
+<div class="auth-screen" id="auth-screen" style="display:none">
+  <div class="auth-box">
+    <div class="auth-logo">🧭</div>
+    <div class="auth-title">Atlas</div>
+    <div class="auth-sub">Держи курс. Войди или создай аккаунт, чтобы синхронизировать данные между устройствами.</div>
+
+    <div class="auth-tabs">
+      <button id="tab-signin" class="active" onclick="setAuthMode('signin')">Войти</button>
+      <button id="tab-signup" onclick="setAuthMode('signup')">Регистрация</button>
+    </div>
+
+    <div id="auth-msg"></div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="ты@email.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Пароль <span style="text-transform:none;font-weight:400;color:var(--text3)">(минимум 6 символов)</span></label>
+      <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitAuth()">
+    </div>
+
+    <button class="btn-primary" id="auth-submit" style="width:100%;justify-content:center;padding:10px" onclick="submitAuth()">Войти</button>
+
+    <button class="auth-guest" onclick="useAsGuest()">Использовать без аккаунта (данные только в этом браузере)</button>
+
+    <div class="auth-footer">© Atlas — твоё пространство для жизни и работы</div>
+  </div>
+</div>
+
+<div class="app" id="main-app" style="display:none">
   <div class="app-header">
     <div>
       <div class="app-title">🧭 Atlas</div>
@@ -348,7 +400,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
   <div id="view-settings"  style="display:none"></div>
 </div>
 
-<button class="fab" onclick="quickAdd()" title="Быстро добавить">+</button>
+<button class="fab" onclick="quickAdd()" title="Быстро добавить" id="fab" style="display:none">+</button>
 
 <div class="modal-bg" id="modal" onclick="if(event.target.id==='modal')closeModal()">
   <div class="modal" id="modal-body"></div>
@@ -1682,6 +1734,34 @@ function renderSettings(){
 
   document.getElementById('view-settings').innerHTML = `
     <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Аккаунт</div>
+      ${currentUser ? `
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">${escHTML(currentUser.email)}</div>
+            <div class="setting-desc">Данные синхронизируются автоматически между всеми устройствами, где ты залогинен.</div>
+          </div>
+          <button class="btn-danger" onclick="signOut()">Выйти</button>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Принудительная синхронизация</div>
+            <div class="setting-desc">На всякий случай — отправить текущие данные в облако прямо сейчас.</div>
+          </div>
+          <button class="btn-secondary" onclick="saveToCloud().then(()=>toast('✓ Отправлено в облако'))">↑ Синхронизировать</button>
+        </div>
+      ` : `
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Гостевой режим</div>
+            <div class="setting-desc">Данные хранятся только в этом браузере. Создай аккаунт, чтобы синхронизировать между устройствами.</div>
+          </div>
+          <button class="btn-primary" onclick="goToAuthScreen()">Создать аккаунт</button>
+        </div>
+      `}
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
       <div class="card-title">Уведомления</div>
       <div class="setting-row">
         <div>
@@ -1963,15 +2043,235 @@ setInterval(rescheduleNotifications, 5*60*1000);
 window.addEventListener('focus', rescheduleNotifications);
 
 /* ============================================================
+   SUPABASE AUTH & CLOUD SYNC
+   ============================================================ */
+const SUPABASE_URL = 'https://ploroaresanhqttynroq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_tZJPr9tSyPSb0EnnwjIVcQ_keEnPm5G';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let isGuestMode = false;
+let authMode = 'signin';   // 'signin' | 'signup'
+let syncTimer = null;
+let isSyncing = false;
+
+function setAuthMode(m){
+  authMode = m;
+  document.getElementById('tab-signin').classList.toggle('active', m==='signin');
+  document.getElementById('tab-signup').classList.toggle('active', m==='signup');
+  document.getElementById('auth-submit').textContent = m==='signin' ? 'Войти' : 'Создать аккаунт';
+  authMsg('');
+}
+function authMsg(text, kind){
+  const el = document.getElementById('auth-msg');
+  if(!text){ el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="auth-msg ${kind||'err'}">${escHTML(text)}</div>`;
+}
+async function submitAuth(){
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if(!email || !password){ authMsg('Заполни email и пароль'); return; }
+  if(password.length < 6){ authMsg('Пароль минимум 6 символов'); return; }
+  const btn = document.getElementById('auth-submit');
+  btn.disabled = true;
+  btn.textContent = '...';
+  try{
+    if(authMode==='signup'){
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if(error) throw error;
+      if(data.session){
+        await onSignedIn(data.session);
+      } else {
+        authMsg('Проверь почту и подтверди регистрацию, потом войди', 'ok');
+        setAuthMode('signin');
+      }
+    } else {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+      await onSignedIn(data.session);
+    }
+  } catch(e){
+    authMsg(translateAuthError(e.message));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = authMode==='signin' ? 'Войти' : 'Создать аккаунт';
+  }
+}
+function translateAuthError(msg){
+  if(/invalid login|invalid credentials/i.test(msg)) return 'Неверный email или пароль';
+  if(/already registered|user.*exists/i.test(msg)) return 'Email уже зарегистрирован — нажми «Войти»';
+  if(/password should be at least/i.test(msg)) return 'Пароль слишком короткий (минимум 6 символов)';
+  if(/email.*invalid/i.test(msg)) return 'Email указан неверно';
+  if(/rate limit|too many/i.test(msg)) return 'Слишком много попыток, подожди минуту';
+  return msg;
+}
+
+async function onSignedIn(session){
+  currentUser = session.user;
+  isGuestMode = false;
+  await loadFromCloud();
+  enterApp();
+}
+
+async function loadFromCloud(){
+  try{
+    const { data, error } = await sb.from('user_data').select('data').eq('user_id', currentUser.id).maybeSingle();
+    if(error) throw error;
+    if(data && data.data && data.data.events){
+      DB = data.data;
+      saveDB(false);  // mirror to localStorage for offline reads, no cloud-push
+    } else {
+      /* First login: if local data exists, migrate it; otherwise fresh */
+      const local = localStorage.getItem(STORAGE_KEY);
+      if(local){
+        const parsed = JSON.parse(local);
+        if(parsed && parsed.events){ DB = parsed; }
+        else DB = freshDB();
+      } else {
+        DB = freshDB();
+      }
+      await saveToCloud();
+    }
+  } catch(e){
+    console.error('loadFromCloud failed', e);
+    toast('Не удалось загрузить данные из облака — работаем локально');
+  }
+}
+
+function scheduleSync(){
+  if(isGuestMode || !currentUser) return;
+  if(syncTimer) clearTimeout(syncTimer);
+  setSyncStatus('syncing');
+  syncTimer = setTimeout(saveToCloud, 800);
+}
+
+async function saveToCloud(){
+  if(!currentUser) return;
+  isSyncing = true;
+  try{
+    const { error } = await sb.from('user_data').upsert({
+      user_id: currentUser.id,
+      data: { ...DB, _scheduledNotifs: undefined },
+      updated_at: new Date().toISOString(),
+    });
+    if(error) throw error;
+    setSyncStatus('synced');
+  } catch(e){
+    console.error('saveToCloud failed', e);
+    setSyncStatus('error');
+  } finally {
+    isSyncing = false;
+  }
+}
+
+function setSyncStatus(status){
+  const el = document.getElementById('sync-status');
+  if(!el) return;
+  if(status==='syncing'){ el.textContent = '⟳ синхронизация…'; el.className = 'sync-status syncing'; }
+  else if(status==='synced'){ el.textContent = '✓ сохранено в облако'; el.className = 'sync-status'; setTimeout(()=>{ if(el.textContent==='✓ сохранено в облако') el.textContent=''; }, 1500); }
+  else if(status==='error'){ el.textContent = '⚠ ошибка синхронизации'; el.className = 'sync-status error'; }
+  else { el.textContent = ''; el.className = 'sync-status'; }
+}
+
+async function signOut(){
+  if(!confirm('Выйти из аккаунта? Локальные данные останутся, но облачная синхронизация прекратится.')) return;
+  if(currentUser){ await sb.auth.signOut(); }
+  currentUser = null;
+  isGuestMode = false;
+  location.reload();
+}
+
+function useAsGuest(){
+  isGuestMode = true;
+  /* Load from localStorage as before (DB уже загружен из loadDB()) */
+  enterApp();
+}
+
+function goToAuthScreen(){
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  setAuthMode('signup');
+}
+
+function enterApp(){
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('fab').style.display = 'flex';
+  applyTheme();
+  injectAccountBadge();
+  showTab(activeTab);
+  rescheduleNotifications();
+  if('Notification' in window && Notification.permission==='granted'){
+    document.getElementById('notif-btn').textContent = '🔔✓';
+  }
+}
+
+function injectAccountBadge(){
+  /* Add email/sync status into header */
+  const actions = document.querySelector('.header-actions');
+  if(!actions || document.getElementById('account-info')) return;
+  const wrap = document.createElement('div');
+  wrap.id = 'account-info';
+  wrap.style.cssText = 'display:flex;align-items:center;gap:8px;margin-right:6px;flex-wrap:wrap';
+  if(currentUser){
+    wrap.innerHTML = `<span class="sync-status" id="sync-status"></span>
+      <span style="font-size:12px;color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHTML(currentUser.email)}">${escHTML(currentUser.email)}</span>`;
+  } else {
+    wrap.innerHTML = `<span style="font-size:12px;color:var(--text3)">👤 гость</span>`;
+  }
+  actions.parentNode.insertBefore(wrap, actions);
+}
+
+/* Hook saveDB to push to cloud after every change */
+const _saveDBLocal = saveDB;
+saveDB = function(pushCloud){
+  _saveDBLocal();
+  if(pushCloud!==false) scheduleSync();
+};
+
+/* Real-time sync between tabs/devices */
+async function subscribeRealtime(){
+  if(!currentUser) return;
+  sb.channel('user_data_' + currentUser.id)
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'user_data', filter: `user_id=eq.${currentUser.id}` },
+      payload => {
+        if(isSyncing) return;  /* ignore our own writes */
+        const incoming = payload.new && payload.new.data;
+        if(incoming && incoming.events && JSON.stringify(incoming) !== JSON.stringify(DB)){
+          DB = incoming;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({...DB, _scheduledNotifs:undefined}));
+          showTab(activeTab);
+          toast('↓ Данные обновились с другого устройства');
+        }
+      })
+    .subscribe();
+}
+
+/* ============================================================
    INIT
    ============================================================ */
-applyTheme();
-showTab(activeTab);
-rescheduleNotifications();
-/* Update notification icon if permission already granted */
-if('Notification' in window && Notification.permission==='granted'){
-  document.getElementById('notif-btn').textContent = '🔔✓';
+async function init(){
+  try{
+    const { data: { session } } = await sb.auth.getSession();
+    if(session){
+      await onSignedIn(session);
+      subscribeRealtime();
+    } else {
+      document.getElementById('auth-screen').style.display = 'flex';
+    }
+  } catch(e){
+    console.error('Auth check failed', e);
+    /* Fallback: show auth screen */
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+  /* React to sign-in/out events from other tabs */
+  sb.auth.onAuthStateChange((event, session) => {
+    if(event==='SIGNED_IN' && !currentUser){ onSignedIn(session).then(subscribeRealtime); }
+    if(event==='SIGNED_OUT'){ location.reload(); }
+  });
 }
+init();
 </script>
 </body>
 </html>
