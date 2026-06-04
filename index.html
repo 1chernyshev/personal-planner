@@ -1806,6 +1806,17 @@ function renderSettings(){
     </div>
 
     <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Шаблоны</div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">🎓 План подготовки в магистратуру</div>
+          <div class="setting-desc">47 событий, 32 задачи, 8 напоминаний и 2 привычки. Июнь–август 2026: ВКР, Stepik, математика, кейсы, мотивационные письма, экзамены ВШЭ / ИТМО / МИФИ.</div>
+        </div>
+        <button class="btn-primary" onclick="loadViktorTemplate()">+ Загрузить</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
       <div class="card-title">Данные</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-secondary" onclick="exportJSON()">⬇ Экспорт JSON</button>
@@ -2059,6 +2070,151 @@ function nextOccurrence(d, repeat){
 /* Re-check every 5 minutes (in case page sits open for long) */
 setInterval(rescheduleNotifications, 5*60*1000);
 window.addEventListener('focus', rescheduleNotifications);
+
+/* ============================================================
+   ПЛАН ПОДГОТОВКИ В МАГИСТРАТУРУ (шаблон)
+   Грузится по кнопке в Настройках; данные добавляются к существующим.
+   ============================================================ */
+const VIKTOR_TEMPLATE = {
+  categories: [
+    {id:'mag-vkr',     name:'ВКР',           color:'teal'},
+    {id:'mag-math',    name:'Математика',    color:'purple'},
+    {id:'mag-product', name:'Продукт/ВШЭ',   color:'blue'},
+    {id:'mag-case',    name:'Кейсы',         color:'amber'},
+    {id:'mag-letter',  name:'Мотив. письмо', color:'pink'},
+    {id:'mag-stepik',  name:'Stepik',        color:'green'},
+    {id:'mag-mile',    name:'Веха/дедлайн',  color:'red'},
+  ],
+  taskList: {id:'mag', name:'🎓 Магистратура', color:'purple'},
+  events: [
+    {date:'2026-06-04',start:'19:30',dur:45,title:'Stepik 1.1 — Портфолио',cat:'mag-stepik'},
+    {date:'2026-06-04',start:'20:15',dur:30,title:'ВКР — тезисы',cat:'mag-vkr'},
+    {date:'2026-06-05',start:'19:30',dur:45,title:'ВКР — тезисы',cat:'mag-vkr'},
+    {date:'2026-06-05',start:'20:15',dur:45,title:'Stepik 1.1',cat:'mag-stepik'},
+    {date:'2026-06-06',start:'19:30',dur:30,title:'ВКР — презентация',cat:'mag-vkr'},
+    {date:'2026-06-06',start:'20:00',dur:60,title:'Stepik 1.2 — Маркетинг',cat:'mag-stepik'},
+    {date:'2026-06-07',start:'19:30',dur:30,title:'ВКР — вопросы',cat:'mag-vkr'},
+    {date:'2026-06-07',start:'20:00',dur:60,title:'Математика — матрицы',cat:'mag-math'},
+    {date:'2026-06-08',start:'19:30',dur:30,title:'ВКР — прогон',cat:'mag-vkr'},
+    {date:'2026-06-08',start:'20:00',dur:60,title:'Stepik 1.2 продолжение',cat:'mag-stepik'},
+    {date:'2026-06-09',start:'10:15',dur:45,title:'Stepik 1.3 — Математика',cat:'mag-stepik'},
+    {date:'2026-06-09',start:'11:00',dur:60,title:'Математика — матрицы',cat:'mag-math'},
+    {date:'2026-06-10',start:'10:15',dur:60,title:'Математика — теорвер',cat:'mag-math'},
+    {date:'2026-06-10',start:'11:15',dur:60,title:'Кейс МИФИ — письменно',cat:'mag-case'},
+    {date:'2026-06-11',start:'09:00',dur:120,title:'ЗАЩИТА ВКР',cat:'mag-mile',note:'Ключевая веха — после неё начинается активная подготовка'},
+    {date:'2026-06-12',start:'19:30',dur:60,title:'Stepik 2.1 — Маркетинг демо',cat:'mag-stepik'},
+    {date:'2026-06-12',start:'20:30',dur:30,title:'Мотив. письмо',cat:'mag-letter'},
+    {date:'2026-06-13',start:'19:30',dur:90,title:'Stepik 2.1 — продолжение',cat:'mag-stepik'},
+    {date:'2026-06-14',start:'10:15',dur:45,title:'Консультация ВШЭ',cat:'mag-mile',note:'Забрать демо по математике и маркетингу ВШЭ'},
+    {date:'2026-06-14',start:'11:00',dur:60,title:'Математика — распределения',cat:'mag-math'},
+    {date:'2026-06-15',start:'10:15',dur:60,title:'Кейс ИТМО — письменно',cat:'mag-case'},
+    {date:'2026-06-15',start:'11:15',dur:45,title:'Письмо МИФИ — чистовик',cat:'mag-letter'},
+    {date:'2026-06-16',start:'19:30',dur:90,title:'Stepik 2.2 — Математика демо',cat:'mag-stepik'},
+    {date:'2026-06-17',start:'19:30',dur:60,title:'Stepik 2.2 — продолжение',cat:'mag-stepik'},
+    {date:'2026-06-17',start:'20:30',dur:30,title:'Продуктовые метрики',cat:'mag-product'},
+    {date:'2026-06-18',start:'19:30',dur:60,title:'Математика — производные',cat:'mag-math'},
+    {date:'2026-06-18',start:'20:30',dur:30,title:'Бизнес-модели саммари',cat:'mag-product'},
+    {date:'2026-06-19',start:'19:30',dur:60,title:'Математика — интегралы',cat:'mag-math'},
+    {date:'2026-06-19',start:'20:30',dur:30,title:'Мотив. письмо доработка',cat:'mag-letter'},
+    {date:'2026-06-20',start:'19:30',dur:60,title:'Математика — обратная матрица',cat:'mag-math'},
+    {date:'2026-06-21',start:'19:30',dur:90,title:'Математика — обратная матрица',cat:'mag-math'},
+    {date:'2026-06-22',start:'19:30',dur:60,title:'Продуктовые метрики',cat:'mag-product'},
+    {date:'2026-06-22',start:'20:30',dur:30,title:'Бизнес-модели',cat:'mag-product'},
+    {date:'2026-06-23',start:'19:30',dur:60,title:'Математика — ряды',cat:'mag-math'},
+    {date:'2026-06-23',start:'20:30',dur:30,title:'Письмо ИТМО',cat:'mag-letter'},
+    {date:'2026-06-24',start:'19:30',dur:60,title:'Продуктовые кейсы A/B',cat:'mag-product'},
+    {date:'2026-06-24',start:'20:30',dur:30,title:'Математика — тест',cat:'mag-math'},
+    {date:'2026-06-25',start:'19:30',dur:60,title:'Математика — тригонометрия',cat:'mag-math'},
+    {date:'2026-06-25',start:'20:30',dur:30,title:'Stepik — повторение',cat:'mag-stepik'},
+    {date:'2026-06-27',start:'10:15',dur:180,title:'Пробный экзамен МИФИ (3ч)',cat:'mag-mile'},
+    {date:'2026-07-11',start:'10:00',dur:60,title:'Получить диплом бакалавра',cat:'mag-mile',note:'После этого можно официально подавать документы'},
+    {date:'2026-07-12',start:'10:00',dur:180,title:'Подать документы: ВШЭ + ИТМО + МИФИ',cat:'mag-mile'},
+    {date:'2026-07-14',start:'10:00',dur:180,title:'Экзамен МИФИ (первая дата)',cat:'mag-mile',note:'Минимум 80/100'},
+    {date:'2026-07-16',start:'19:30',dur:60,title:'Продуктовые кейсы A/B',cat:'mag-product'},
+    {date:'2026-07-31',start:'10:00',dur:180,title:'Экзамен ИТМО/Практикум',cat:'mag-mile',note:'Кейс + письмо + собеседование. Мин 50/100'},
+    {date:'2026-08-01',start:'19:30',dur:90,title:'Stepik — повторение курса',cat:'mag-stepik'},
+    {date:'2026-08-10',start:'19:30',dur:60,title:'Математика ВШЭ — демо',cat:'mag-math'},
+    {date:'2026-08-15',start:'10:15',dur:120,title:'Пробный тест ВШЭ ai-marketing',cat:'mag-mile'},
+    {date:'2026-08-16',start:'10:15',dur:90,title:'Портфолио ВШЭ — сборка',cat:'mag-letter'},
+    {date:'2026-08-19',start:'23:00',dur:60,title:'ДЕДЛАЙН ВШЭ',cat:'mag-mile',note:'Последний день подачи в ai-marketing и digital-pm'},
+  ],
+  tasks: [
+    {title:'ВКР — повторить тезисы и презентацию',cat:'mag-vkr',priority:'high',note:'Каждый день до защиты 11 июня'},
+    {title:'Stepik 1.1 — Собираем портфолио',cat:'mag-stepik',priority:'med',deadline:'2026-06-06'},
+    {title:'Stepik 1.2 — Разбор задач по маркетингу',cat:'mag-stepik',priority:'med',deadline:'2026-06-08'},
+    {title:'Stepik 1.3 — Математика и Python (часть 1)',cat:'mag-stepik',priority:'med',deadline:'2026-06-09'},
+    {title:'Математика — матрицы и определители',cat:'mag-math',priority:'med'},
+    {title:'Математика — теорвер (Бернулли, сочетания)',cat:'mag-math',priority:'med'},
+    {title:'Кейс МИФИ — первый письменный (60 мин)',cat:'mag-case',priority:'med'},
+    {title:'Stepik 2.1 — Демовариант: маркетинг',cat:'mag-stepik',priority:'med',deadline:'2026-06-16'},
+    {title:'Stepik 2.2 — Демовариант: математика и Python',cat:'mag-stepik',priority:'med',deadline:'2026-06-18'},
+    {title:'Математика — производные, интегралы',cat:'mag-math',priority:'med'},
+    {title:'Мотивационное письмо — черновик',cat:'mag-letter',priority:'high'},
+    {title:'Консультация ВШЭ — получить демо',cat:'mag-mile',priority:'high',deadline:'2026-06-14'},
+    {title:'Математика — нормальное распределение',cat:'mag-math',priority:'med'},
+    {title:'Кейс ИТМО — письменно',cat:'mag-case',priority:'med'},
+    {title:'Мотив. письмо — чистовик МИФИ',cat:'mag-letter',priority:'high'},
+    {title:'Математика — обратная матрица',cat:'mag-math',priority:'med'},
+    {title:'Продуктовые метрики — саммари',cat:'mag-product',priority:'med'},
+    {title:'Бизнес-модели Остервальдера',cat:'mag-product',priority:'low'},
+    {title:'Математика — ряды, тригонометрия',cat:'mag-math',priority:'med'},
+    {title:'Пробный экзамен МИФИ (3ч)',cat:'mag-mile',priority:'high',deadline:'2026-06-27'},
+    {title:'Мотив. письмо — версия для ИТМО',cat:'mag-letter',priority:'high'},
+    {title:'Получить диплом бакалавра',cat:'mag-mile',priority:'high',deadline:'2026-07-11'},
+    {title:'Подать документы во все 4 направления',cat:'mag-mile',priority:'high',deadline:'2026-07-12'},
+    {title:'Сдать экзамен МИФИ',cat:'mag-mile',priority:'high',deadline:'2026-07-14'},
+    {title:'Финальная подготовка к ИТМО',cat:'mag-case',priority:'high'},
+    {title:'Продуктовые кейсы — A/B, unit-экономика',cat:'mag-product',priority:'med'},
+    {title:'Экзамен ИТМО/Практикум',cat:'mag-mile',priority:'high',deadline:'2026-07-31'},
+    {title:'Stepik — повторение всего курса ВШЭ',cat:'mag-stepik',priority:'med'},
+    {title:'Математика ВШЭ — демовариант',cat:'mag-math',priority:'high'},
+    {title:'Пробный тест ВШЭ — полный',cat:'mag-mile',priority:'high',deadline:'2026-08-15'},
+    {title:'Портфолио ВШЭ — финальная сборка',cat:'mag-letter',priority:'high'},
+    {title:'Дедлайн подачи ВШЭ',cat:'mag-mile',priority:'high',deadline:'2026-08-19'},
+  ],
+  reminders: [
+    {title:'⚠ Защита ВКР',                date:'2026-06-11',time:'08:00'},
+    {title:'⚠ Консультация ВШЭ',          date:'2026-06-14',time:'09:00'},
+    {title:'⚠ Пробный экзамен МИФИ',      date:'2026-06-27',time:'09:00'},
+    {title:'⚠ Получить диплом',           date:'2026-07-11',time:'09:00'},
+    {title:'⚠ Подача документов',         date:'2026-07-12',time:'09:00'},
+    {title:'⚠ Экзамен МИФИ',              date:'2026-07-14',time:'09:00'},
+    {title:'⚠ Экзамен ИТМО/Практикум',    date:'2026-07-31',time:'09:00'},
+    {title:'⚠ ДЕДЛАЙН ВШЭ ai-marketing',  date:'2026-08-19',time:'12:00'},
+  ],
+  habits: [
+    {name:'Stepik — 45 минут в день',  cat:'mag-stepik',color:'green',
+      schedule:{type:'custom',days:[1,2,3,4,5],startDate:'2026-06-04',endDate:'2026-08-19'},
+      reminders:[{time:'19:30'}]},
+    {name:'Математика — задачи',       cat:'mag-math',  color:'purple',
+      schedule:{type:'custom',days:[1,2,3,4,5,6,7],startDate:'2026-06-04',endDate:'2026-08-19'},
+      reminders:[{time:'20:30'}]},
+  ],
+};
+
+function loadViktorTemplate(){
+  if(!confirm('Загрузить план подготовки в магистратуру?\n\nДобавится:\n• 47 событий в календарь\n• 32 задачи в новый список «🎓 Магистратура»\n• 8 напоминаний о ключевых датах\n• 2 привычки (Stepik / Математика)\n• 7 категорий\n\nТекущие данные НЕ пострадают.')) return;
+  /* Categories — only add missing */
+  VIKTOR_TEMPLATE.categories.forEach(c => {
+    if(!DB.categories.find(x => x.id===c.id)) DB.categories.push(c);
+  });
+  /* Task list */
+  const tl = VIKTOR_TEMPLATE.taskList;
+  if(!DB.taskLists.find(x => x.id===tl.id)) DB.taskLists.push(tl);
+  /* Events */
+  VIKTOR_TEMPLATE.events.forEach(e => DB.events.push({...e, id:uid(), done:false, note:e.note||''}));
+  /* Tasks */
+  VIKTOR_TEMPLATE.tasks.forEach(t => DB.tasks.push({...t, id:uid(), list:tl.id,
+    deadline:t.deadline||'', deadlineTime:'', reminder:'', tags:[], subtasks:[], note:t.note||'', done:false, created:Date.now()}));
+  /* Reminders */
+  VIKTOR_TEMPLATE.reminders.forEach(r => DB.reminders.push({...r, id:uid(), list:DB.reminderLists[0]?.id||'main',
+    repeat:'none', note:'', done:false, created:Date.now()}));
+  /* Habits */
+  VIKTOR_TEMPLATE.habits.forEach(h => DB.habits.push({...h, id:uid(), log:{}}));
+  saveDB();
+  toast('✓ План подготовки загружен в Atlas');
+  showTab(activeTab);
+}
 
 /* ============================================================
    SUPABASE AUTH & CLOUD SYNC
