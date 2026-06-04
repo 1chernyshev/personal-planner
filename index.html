@@ -4,7 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Atlas — держи курс</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta name="theme-color" content="#378ADD">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Atlas">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://ploroaresanhqttynroq.supabase.co">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://ploroaresanhqttynroq.supabase.co">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <style>
 :root{
   --bg:#ffffff;--bg2:#f8f8f6;--bg3:#f1f0ec;--bg4:#e9e8e3;
@@ -346,6 +355,15 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 </style>
 </head>
 <body>
+
+<!-- SPLASH SCREEN — shown instantly, hidden after init -->
+<div id="splash" style="position:fixed;inset:0;background:#f1f0ec;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;transition:opacity .3s">
+  <div style="font-size:60px;line-height:1">🧭</div>
+  <div style="font-size:24px;font-weight:700;margin-top:10px;color:#1a1a18;letter-spacing:-.01em">Atlas</div>
+  <div style="font-size:12px;color:#6b6b68;margin-top:4px">Держи курс</div>
+  <div style="margin-top:24px;width:22px;height:22px;border:2.5px solid #e0dfd9;border-top-color:#378ADD;border-radius:50%;animation:atlasSpin .8s linear infinite"></div>
+  <style>@keyframes atlasSpin{to{transform:rotate(360deg)}}</style>
+</div>
 
 <!-- AUTH SCREEN (shown until user signs in or chooses guest mode) -->
 <div class="auth-screen" id="auth-screen" style="display:none">
@@ -2047,8 +2065,29 @@ window.addEventListener('focus', rescheduleNotifications);
    ============================================================ */
 const SUPABASE_URL = 'https://ploroaresanhqttynroq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_tZJPr9tSyPSb0EnnwjIVcQ_keEnPm5G';
-const SUPABASE_AVAILABLE = !!(window.supabase && window.supabase.createClient);
-const sb = SUPABASE_AVAILABLE ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+let sb = null;
+
+function waitForSupabase(timeoutMs){
+  return new Promise(resolve => {
+    if(window.supabase && window.supabase.createClient){ resolve(true); return; }
+    let elapsed = 0;
+    const tick = setInterval(() => {
+      if(window.supabase && window.supabase.createClient){
+        clearInterval(tick); resolve(true);
+      } else if(elapsed >= timeoutMs){
+        clearInterval(tick); resolve(false);
+      }
+      elapsed += 50;
+    }, 50);
+  });
+}
+
+function hideSplash(){
+  const s = document.getElementById('splash');
+  if(!s) return;
+  s.style.opacity = '0';
+  setTimeout(() => { s.style.display = 'none'; }, 300);
+}
 
 let currentUser = null;
 let isGuestMode = false;
@@ -2196,6 +2235,7 @@ function goToAuthScreen(){
 }
 
 function enterApp(){
+  hideSplash();
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
   document.getElementById('fab').style.display = 'flex';
@@ -2254,10 +2294,14 @@ async function subscribeRealtime(){
    INIT
    ============================================================ */
 async function init(){
-  /* If Supabase SDK didn't load (slow network, blocker etc.) — fall back to guest mode */
-  if(!SUPABASE_AVAILABLE){
-    console.warn('Supabase SDK not loaded — falling back to guest mode');
-    showAuthScreenWithMsg('Облачная синхронизация недоступна (нет связи с сервером). Можно пользоваться без аккаунта.');
+  /* Wait up to 5s for Supabase SDK (deferred, async) */
+  const sdkReady = await waitForSupabase(5000);
+  if(sdkReady){
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } else {
+    console.warn('Supabase SDK not loaded after 5s — guest mode');
+    hideSplash();
+    showAuthScreenWithMsg('Облачная синхронизация недоступна (медленный интернет?). Можно работать без аккаунта.');
     return;
   }
   try{
@@ -2266,10 +2310,12 @@ async function init(){
       await onSignedIn(session);
       subscribeRealtime();
     } else {
+      hideSplash();
       document.getElementById('auth-screen').style.display = 'flex';
     }
   } catch(e){
     console.error('Auth check failed', e);
+    hideSplash();
     showAuthScreenWithMsg('Не удалось подключиться к серверу. Попробуй обновить страницу или войди как гость.');
   }
   if(sb){
@@ -2297,6 +2343,13 @@ window.addEventListener('error', e => {
     </div>`;
   }
 });
+
+/* Register service worker for offline + instant loads (skip on file://) */
+if('serviceWorker' in navigator && location.protocol !== 'file:'){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW registration failed:', e));
+  });
+}
 
 /* Wait for DOM + start init */
 if(document.readyState === 'loading'){
