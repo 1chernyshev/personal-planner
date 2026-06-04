@@ -484,7 +484,7 @@ const DEFAULT_CATEGORIES = [
 function freshDB(){
   const now = Date.now();
   return {
-    categories: structuredClone(DEFAULT_CATEGORIES),
+    categories: JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)),
     events: [
       {id:uid(),date:todayKey(),start:'09:00',dur:60,title:'Пример события — двойной клик отредактирует',cat:'work',note:'',done:false},
     ],
@@ -2047,7 +2047,8 @@ window.addEventListener('focus', rescheduleNotifications);
    ============================================================ */
 const SUPABASE_URL = 'https://ploroaresanhqttynroq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_tZJPr9tSyPSb0EnnwjIVcQ_keEnPm5G';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_AVAILABLE = !!(window.supabase && window.supabase.createClient);
+const sb = SUPABASE_AVAILABLE ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 let currentUser = null;
 let isGuestMode = false;
@@ -2068,6 +2069,7 @@ function authMsg(text, kind){
   el.innerHTML = `<div class="auth-msg ${kind||'err'}">${escHTML(text)}</div>`;
 }
 async function submitAuth(){
+  if(!sb){ authMsg('Облачные аккаунты недоступны — используй кнопку «Без аккаунта»'); return; }
   const email = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
   if(!email || !password){ authMsg('Заполни email и пароль'); return; }
@@ -2146,7 +2148,7 @@ function scheduleSync(){
 }
 
 async function saveToCloud(){
-  if(!currentUser) return;
+  if(!currentUser || !sb) return;
   isSyncing = true;
   try{
     const { error } = await sb.from('user_data').upsert({
@@ -2231,7 +2233,7 @@ saveDB = function(pushCloud){
 
 /* Real-time sync between tabs/devices */
 async function subscribeRealtime(){
-  if(!currentUser) return;
+  if(!currentUser || !sb) return;
   sb.channel('user_data_' + currentUser.id)
     .on('postgres_changes',
       { event: '*', schema: 'public', table: 'user_data', filter: `user_id=eq.${currentUser.id}` },
@@ -2252,6 +2254,12 @@ async function subscribeRealtime(){
    INIT
    ============================================================ */
 async function init(){
+  /* If Supabase SDK didn't load (slow network, blocker etc.) — fall back to guest mode */
+  if(!SUPABASE_AVAILABLE){
+    console.warn('Supabase SDK not loaded — falling back to guest mode');
+    showAuthScreenWithMsg('Облачная синхронизация недоступна (нет связи с сервером). Можно пользоваться без аккаунта.');
+    return;
+  }
   try{
     const { data: { session } } = await sb.auth.getSession();
     if(session){
@@ -2262,16 +2270,40 @@ async function init(){
     }
   } catch(e){
     console.error('Auth check failed', e);
-    /* Fallback: show auth screen */
-    document.getElementById('auth-screen').style.display = 'flex';
+    showAuthScreenWithMsg('Не удалось подключиться к серверу. Попробуй обновить страницу или войди как гость.');
   }
-  /* React to sign-in/out events from other tabs */
-  sb.auth.onAuthStateChange((event, session) => {
-    if(event==='SIGNED_IN' && !currentUser){ onSignedIn(session).then(subscribeRealtime); }
-    if(event==='SIGNED_OUT'){ location.reload(); }
-  });
+  if(sb){
+    sb.auth.onAuthStateChange((event, session) => {
+      if(event==='SIGNED_IN' && !currentUser){ onSignedIn(session).then(subscribeRealtime); }
+      if(event==='SIGNED_OUT'){ location.reload(); }
+    });
+  }
 }
-init();
+function showAuthScreenWithMsg(msg){
+  document.getElementById('auth-screen').style.display = 'flex';
+  setTimeout(() => authMsg(msg, 'err'), 100);
+}
+
+/* Global error handler — show readable error instead of white screen */
+window.addEventListener('error', e => {
+  if(document.getElementById('auth-screen').style.display === 'none' &&
+     document.getElementById('main-app').style.display === 'none'){
+    document.body.innerHTML = `<div style="padding:24px;font-family:-apple-system,sans-serif;max-width:520px;margin:60px auto;text-align:center">
+      <div style="font-size:48px">🧭</div>
+      <h2 style="margin:12px 0">Atlas</h2>
+      <p style="color:#888;margin-bottom:20px">Что-то пошло не так при загрузке. Попробуй обновить страницу.</p>
+      <button onclick="location.reload()" style="padding:10px 20px;background:#378ADD;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">Обновить</button>
+      <details style="margin-top:24px;text-align:left;font-size:11px;color:#aaa"><summary>Технические детали</summary><pre style="white-space:pre-wrap;margin-top:8px">${(e.message||'unknown')+'\n'+(e.filename||'')+':'+(e.lineno||'')}</pre></details>
+    </div>`;
+  }
+});
+
+/* Wait for DOM + start init */
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 </script>
 </body>
 </html>
