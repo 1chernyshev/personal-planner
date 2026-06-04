@@ -1806,14 +1806,18 @@ function renderSettings(){
     </div>
 
     <div class="card" style="margin-bottom:16px">
-      <div class="card-title">Шаблоны</div>
-      <div class="setting-row">
-        <div>
-          <div class="setting-label">🎓 План подготовки в магистратуру</div>
-          <div class="setting-desc">47 событий, 32 задачи, 8 напоминаний и 2 привычки. Июнь–август 2026: ВКР, Stepik, математика, кейсы, мотивационные письма, экзамены ВШЭ / ИТМО / МИФИ.</div>
+      <div class="card-title">Шаблоны жизни</div>
+      <div class="setting-desc" style="margin-bottom:14px">Готовые программы, которые добавляются в твой Atlas одной кнопкой. События, задачи, привычки и напоминания — всё настроено. Существующие данные не пострадают.</div>
+      ${TEMPLATES.map((t,i) => `
+        <div class="setting-row" style="${i===0?'':'border-top:1px solid var(--border)'}">
+          <div style="flex:1;min-width:0">
+            <div class="setting-label">${t.icon} ${escHTML(t.name)}</div>
+            <div class="setting-desc" style="margin-top:4px">${escHTML(t.desc)}</div>
+            <div style="display:inline-block;font-size:10px;color:var(--text3);background:var(--bg2);padding:2px 8px;border-radius:4px;margin-top:6px">${escHTML(t.badge)}</div>
+          </div>
+          <button class="btn-primary" onclick="TEMPLATES.find(x=>x.id==='${t.id}').apply()">+ Загрузить</button>
         </div>
-        <button class="btn-primary" onclick="loadViktorTemplate()">+ Загрузить</button>
-      </div>
+      `).join('')}
     </div>
 
     <div class="card" style="margin-bottom:16px">
@@ -2193,26 +2197,312 @@ const VIKTOR_TEMPLATE = {
 };
 
 function loadViktorTemplate(){
-  if(!confirm('Загрузить план подготовки в магистратуру?\n\nДобавится:\n• 47 событий в календарь\n• 32 задачи в новый список «🎓 Магистратура»\n• 8 напоминаний о ключевых датах\n• 2 привычки (Stepik / Математика)\n• 7 категорий\n\nТекущие данные НЕ пострадают.')) return;
-  /* Categories — only add missing */
-  VIKTOR_TEMPLATE.categories.forEach(c => {
-    if(!DB.categories.find(x => x.id===c.id)) DB.categories.push(c);
-  });
-  /* Task list */
-  const tl = VIKTOR_TEMPLATE.taskList;
-  if(!DB.taskLists.find(x => x.id===tl.id)) DB.taskLists.push(tl);
-  /* Events */
-  VIKTOR_TEMPLATE.events.forEach(e => DB.events.push({...e, id:uid(), done:false, note:e.note||''}));
-  /* Tasks */
-  VIKTOR_TEMPLATE.tasks.forEach(t => DB.tasks.push({...t, id:uid(), list:tl.id,
+  if(!confirm('Загрузить план подготовки в магистратуру?\n\n• 47 событий в календарь\n• 32 задачи в новый список «🎓 Магистратура»\n• 8 напоминаний\n• 2 привычки\n• 7 категорий\n\nТекущие данные НЕ пострадают.')) return;
+  applyTemplateCore(VIKTOR_TEMPLATE);
+  toast('✓ План подготовки загружен');
+  showTab(activeTab);
+}
+
+function applyTemplateCore(tpl){
+  (tpl.categories||[]).forEach(c => { if(!DB.categories.find(x => x.id===c.id)) DB.categories.push(c); });
+  let listId = DB.taskLists[0]?.id || 'inbox';
+  if(tpl.taskList){
+    if(!DB.taskLists.find(x => x.id===tpl.taskList.id)) DB.taskLists.push(tpl.taskList);
+    listId = tpl.taskList.id;
+  }
+  (tpl.events||[]).forEach(e => DB.events.push({...e, id:uid(), done:false, note:e.note||''}));
+  (tpl.tasks||[]).forEach(t => DB.tasks.push({...t, id:uid(), list:listId,
     deadline:t.deadline||'', deadlineTime:'', reminder:'', tags:[], subtasks:[], note:t.note||'', done:false, created:Date.now()}));
-  /* Reminders */
-  VIKTOR_TEMPLATE.reminders.forEach(r => DB.reminders.push({...r, id:uid(), list:DB.reminderLists[0]?.id||'main',
-    repeat:'none', note:'', done:false, created:Date.now()}));
-  /* Habits */
-  VIKTOR_TEMPLATE.habits.forEach(h => DB.habits.push({...h, id:uid(), log:{}}));
+  (tpl.reminders||[]).forEach(r => DB.reminders.push({...r, id:uid(), list:DB.reminderLists[0]?.id||'main',
+    repeat:r.repeat||'none', note:r.note||'', done:false, created:Date.now()}));
+  (tpl.habits||[]).forEach(h => DB.habits.push({...h, id:uid(), log:{}}));
   saveDB();
-  toast('✓ План подготовки загружен в Atlas');
+}
+
+/* ============================================================
+   ДИНАМИЧЕСКИЕ ШАБЛОНЫ (старт с ближайшего понедельника)
+   ============================================================ */
+function nextMonday(){
+  const d = new Date(); d.setHours(0,0,0,0);
+  const day = d.getDay();
+  const diff = day===0 ? 1 : (8-day)%7 || 7;
+  d.setDate(d.getDate()+diff);
+  return d;
+}
+function dateFromOffset(start, offsetDays){
+  return dkey(addDays(start, offsetDays));
+}
+
+/* 💪 5/3/1 Силовая (4 недели по Вендлеру) */
+function buildStrengthTemplate(){
+  const start = nextMonday();
+  const events = [];
+  /* 4 недели × 4 тренировки: Пн жим лёжа, Ср присед, Пт жим стоя, Сб становая */
+  const sessions = [
+    {wd:0,name:'Жим лёжа',hint:'5/3/1: 65/75/85% от 1ПМ. После — отжимания 5×макс'},
+    {wd:2,name:'Приседания',hint:'5/3/1 + выпады 3×10, пресс 3×15'},
+    {wd:4,name:'Жим стоя',hint:'5/3/1 + подтягивания 5×макс'},
+    {wd:5,name:'Становая тяга',hint:'5/3/1 + румынская тяга 3×10, планка 3×60с'},
+  ];
+  const weekTitle = ['Неделя 1 (5×5)','Неделя 2 (3×3)','Неделя 3 (5/3/1)','Разгрузка'];
+  for(let w=0; w<4; w++){
+    sessions.forEach(s => {
+      events.push({
+        date: dateFromOffset(start, w*7 + s.wd),
+        start: '19:00', dur: 75,
+        title: `${s.name} · ${weekTitle[w]}`,
+        cat: 'tpl-strength', note: s.hint,
+      });
+    });
+  }
+  return {
+    categories: [
+      {id:'tpl-strength',name:'💪 Силовая', color:'red'},
+      {id:'tpl-mobility',name:'🧘 Мобильность', color:'teal'},
+    ],
+    taskList: {id:'tpl-fit-list',name:'💪 Тренировки', color:'red'},
+    events,
+    tasks: [
+      {title:'Узнать свои 1ПМ (жим, присед, становая, жим стоя)', cat:'tpl-strength', priority:'high', deadline:dateFromOffset(start,-2)},
+      {title:'Купить пояс / магнезию / напульсники',              cat:'tpl-strength', priority:'low'},
+      {title:'Сделать фото «до» (спереди, сбоку, сзади)',         cat:'tpl-strength', priority:'med', deadline:dateFromOffset(start,0)},
+      {title:'Замерить веса в конце цикла',                       cat:'tpl-strength', priority:'med', deadline:dateFromOffset(start,28)},
+    ],
+    reminders: [
+      {title:'💪 Сегодня тренировка!', date:dateFromOffset(start,0), time:'18:30'},
+      {title:'📸 Конец цикла — фото прогресса', date:dateFromOffset(start,27), time:'19:00'},
+    ],
+    habits: [
+      {name:'Силовая тренировка 4×/неделю', cat:'tpl-strength', color:'red',
+        schedule:{type:'custom',days:[1,3,5,6],startDate:dkey(start),endDate:dateFromOffset(start,27)},
+        reminders:[{time:'18:30'}]},
+      {name:'Растяжка 10 мин', cat:'tpl-mobility', color:'teal',
+        schedule:{type:'daily',days:[1,2,3,4,5,6,7],startDate:dkey(start),endDate:dateFromOffset(start,27)},
+        reminders:[{time:'22:00'}]},
+      {name:'2 литра воды', cat:'tpl-mobility', color:'teal',
+        schedule:{type:'daily',days:[1,2,3,4,5,6,7],startDate:dkey(start),endDate:''},
+        reminders:[]},
+    ],
+  };
+}
+
+/* 🏃 Полумарафон за 8 недель */
+function buildHalfMarathonTemplate(){
+  const start = nextMonday();
+  const events = [];
+  /* 4 пробежки в неделю: Вт-лёгкая, Чт-темп, Сб-интервалы, Вс-длинная */
+  const plan = [
+    /* week, day, km, kind */
+    [0,1,5,'Лёгкая'],[0,3,5,'Темп'],[0,5,4,'Интервалы 6×400м'],[0,6,8,'Длинная'],
+    [1,1,5,'Лёгкая'],[1,3,6,'Темп'],[1,5,5,'Интервалы 5×800м'],[1,6,10,'Длинная'],
+    [2,1,6,'Лёгкая'],[2,3,7,'Темп'],[2,5,5,'Интервалы 4×1000м'],[2,6,12,'Длинная'],
+    [3,1,6,'Лёгкая'],[3,3,8,'Темп'],[3,5,6,'Интервалы 6×800м'],[3,6,14,'Длинная'],
+    [4,1,5,'Восст. лёгкая'],[4,3,6,'Темп'],[4,6,10,'Длинная (разгрузка)'],
+    [5,1,6,'Лёгкая'],[5,3,8,'Темп'],[5,5,6,'Интервалы 5×1000м'],[5,6,16,'Длинная'],
+    [6,1,6,'Лёгкая'],[6,3,8,'Темп'],[6,5,5,'Интервалы 4×1000м'],[6,6,18,'Длинная'],
+    [7,1,5,'Лёгкая'],[7,3,5,'Темп'],[7,6,21.1,'ЗАБЕГ 🏁'],
+  ];
+  plan.forEach(([w,d,km,kind]) => {
+    events.push({
+      date: dateFromOffset(start, w*7+d),
+      start: '07:30', dur: Math.max(30, Math.round(km*6)),
+      title: `🏃 ${km} км — ${kind}`,
+      cat: kind==='ЗАБЕГ 🏁' ? 'tpl-mile' : 'tpl-run',
+      note: kind==='Длинная' ? 'Спокойный темп, можно говорить во время бега' : '',
+    });
+  });
+  return {
+    categories: [
+      {id:'tpl-run',name:'🏃 Бег', color:'blue'},
+      {id:'tpl-mile',name:'🏁 Цель/забег', color:'red'},
+    ],
+    taskList: {id:'tpl-run-list',name:'🏃 Полумарафон', color:'blue'},
+    events,
+    tasks: [
+      {title:'Зарегистрироваться на полумарафон', cat:'tpl-mile', priority:'high', deadline:dateFromOffset(start,0)},
+      {title:'Купить новые кроссовки (бегать минимум 50 км)', cat:'tpl-run', priority:'high', deadline:dateFromOffset(start,7)},
+      {title:'Сдать анализы (общий, ЭКГ перед нагрузкой)', cat:'tpl-mile', priority:'med', deadline:dateFromOffset(start,3)},
+      {title:'Скачать приложение для трекинга бега', cat:'tpl-run', priority:'low', deadline:dateFromOffset(start,0)},
+    ],
+    reminders: [
+      {title:'🏁 ПОЛУМАРАФОН — день забега!', date:dateFromOffset(start,55), time:'06:00'},
+      {title:'🍝 Carb-loading накануне забега', date:dateFromOffset(start,54), time:'18:00'},
+    ],
+    habits: [
+      {name:'Утренний бег по плану', cat:'tpl-run', color:'blue',
+        schedule:{type:'custom',days:[2,4,6,7],startDate:dkey(start),endDate:dateFromOffset(start,55)},
+        reminders:[{time:'07:00'}]},
+      {name:'Растяжка после бега', cat:'tpl-run', color:'teal',
+        schedule:{type:'custom',days:[2,4,6,7],startDate:dkey(start),endDate:dateFromOffset(start,55)},
+        reminders:[]},
+    ],
+  };
+}
+
+/* 🇬🇧 Английский — 60 дней */
+function buildEnglishTemplate(){
+  const start = nextMonday();
+  return {
+    categories: [{id:'tpl-eng',name:'🇬🇧 Английский', color:'amber'}],
+    taskList: {id:'tpl-eng-list',name:'🇬🇧 Английский', color:'amber'},
+    events: [
+      {date:dateFromOffset(start,14), start:'19:00', dur:60, title:'🇬🇧 Чекпоинт #1 — пройти словарный тест', cat:'tpl-eng', note:'Цель: 500 новых слов за 2 недели'},
+      {date:dateFromOffset(start,30), start:'19:00', dur:60, title:'🇬🇧 Чекпоинт #2 — диалог с носителем (italki)', cat:'tpl-eng'},
+      {date:dateFromOffset(start,45), start:'19:00', dur:60, title:'🇬🇧 Чекпоинт #3 — посмотреть фильм без субтитров', cat:'tpl-eng'},
+      {date:dateFromOffset(start,60), start:'19:00', dur:90, title:'🇬🇧 Финал — IELTS Mock Test', cat:'tpl-eng', note:'Полный тест 2.5 часа, оценить уровень'},
+    ],
+    tasks: [
+      {title:'Скачать Anki + колоду 1000 most common', cat:'tpl-eng', priority:'high', deadline:dateFromOffset(start,0)},
+      {title:'Подписаться на BBC Learning English / Spotify', cat:'tpl-eng', priority:'med', deadline:dateFromOffset(start,1)},
+      {title:'Найти буддиного speaking partner (italki / Tandem)', cat:'tpl-eng', priority:'med', deadline:dateFromOffset(start,7)},
+      {title:'Выучить 1000 слов', cat:'tpl-eng', priority:'high', deadline:dateFromOffset(start,60)},
+      {title:'Прочитать одну книгу на английском', cat:'tpl-eng', priority:'med', deadline:dateFromOffset(start,60)},
+    ],
+    reminders: [
+      {title:'🇬🇧 Время повторить Anki', date:dateFromOffset(start,0), time:'08:00', repeat:'daily'},
+    ],
+    habits: [
+      {name:'Anki — 30 минут', cat:'tpl-eng', color:'amber',
+        schedule:{type:'daily',days:[1,2,3,4,5,6,7],startDate:dkey(start),endDate:dateFromOffset(start,60)},
+        reminders:[{time:'08:00'}]},
+      {name:'Подкаст/видео на английском', cat:'tpl-eng', color:'amber',
+        schedule:{type:'daily',days:[1,2,3,4,5,6,7],startDate:dkey(start),endDate:dateFromOffset(start,60)},
+        reminders:[{time:'19:00'}]},
+      {name:'Чтение на английском 20 мин', cat:'tpl-eng', color:'amber',
+        schedule:{type:'custom',days:[1,2,3,4,5],startDate:dkey(start),endDate:dateFromOffset(start,60)},
+        reminders:[{time:'22:00'}]},
+    ],
+  };
+}
+
+/* 📚 Чтение — 30 дней */
+function buildReadingTemplate(){
+  const start = nextMonday();
+  return {
+    categories: [{id:'tpl-read',name:'📚 Чтение', color:'purple'}],
+    taskList: {id:'tpl-read-list',name:'📚 Книжный клуб', color:'purple'},
+    events: [
+      {date:dateFromOffset(start,0),  start:'21:00', dur:30, title:'📚 Старт — выбрать первую книгу', cat:'tpl-read'},
+      {date:dateFromOffset(start,30), start:'21:00', dur:60, title:'📚 Финал — написать рецензии на прочитанное', cat:'tpl-read'},
+    ],
+    tasks: [
+      {title:'Составить список из 4 книг на 30 дней', cat:'tpl-read', priority:'high', deadline:dateFromOffset(start,0)},
+      {title:'Книга 1 (Дни 1–7)',  cat:'tpl-read', priority:'med', deadline:dateFromOffset(start,7)},
+      {title:'Книга 2 (Дни 8–14)', cat:'tpl-read', priority:'med', deadline:dateFromOffset(start,14)},
+      {title:'Книга 3 (Дни 15–22)', cat:'tpl-read', priority:'med', deadline:dateFromOffset(start,22)},
+      {title:'Книга 4 (Дни 23–30)', cat:'tpl-read', priority:'med', deadline:dateFromOffset(start,30)},
+    ],
+    reminders: [],
+    habits: [
+      {name:'30 минут чтения', cat:'tpl-read', color:'purple',
+        schedule:{type:'daily',days:[1,2,3,4,5,6,7],startDate:dkey(start),endDate:dateFromOffset(start,30)},
+        reminders:[{time:'21:30'}]},
+      {name:'Без телефона за 1 час до сна', cat:'tpl-read', color:'purple',
+        schedule:{type:'daily',days:[1,2,3,4,5,6,7],startDate:dkey(start),endDate:dateFromOffset(start,30)},
+        reminders:[{time:'21:00'}]},
+    ],
+  };
+}
+
+/* 🥗 Здоровое питание + ритм */
+function buildHealthTemplate(){
+  const start = nextMonday();
+  return {
+    categories: [
+      {id:'tpl-health',name:'🥗 Питание', color:'green'},
+      {id:'tpl-sleep', name:'😴 Сон', color:'purple'},
+    ],
+    taskList: {id:'tpl-health-list',name:'🥗 Здоровье', color:'green'},
+    events: [
+      {date:dateFromOffset(start,0), start:'19:00', dur:60, title:'🛒 Закупка по списку на неделю', cat:'tpl-health'},
+      {date:dateFromOffset(start,7), start:'19:00', dur:60, title:'🛒 Закупка по списку на неделю', cat:'tpl-health'},
+      {date:dateFromOffset(start,14),start:'19:00', dur:60, title:'🛒 Закупка по списку на неделю', cat:'tpl-health'},
+      {date:dateFromOffset(start,21),start:'19:00', dur:60, title:'🛒 Закупка по списку на неделю', cat:'tpl-health'},
+      {date:dateFromOffset(start,28),start:'10:00', dur:30, title:'⚖️ Финальное взвешивание + замеры', cat:'tpl-health'},
+    ],
+    tasks: [
+      {title:'Купить весы кухонные + напольные', cat:'tpl-health', priority:'high', deadline:dateFromOffset(start,2)},
+      {title:'Составить список разрешённых/запрещённых продуктов', cat:'tpl-health', priority:'high', deadline:dateFromOffset(start,0)},
+      {title:'Подписаться на 3 простых здоровых рецепта в Telegram', cat:'tpl-health', priority:'low'},
+      {title:'Узнать свою норму калорий и БЖУ', cat:'tpl-health', priority:'med', deadline:dateFromOffset(start,1)},
+    ],
+    reminders: [
+      {title:'💧 Стакан воды натощак', date:dateFromOffset(start,0), time:'07:00', repeat:'daily'},
+      {title:'🥗 Подготовить обед на завтра', date:dateFromOffset(start,0), time:'22:00', repeat:'daily'},
+    ],
+    habits: [
+      {name:'2 литра воды', cat:'tpl-health', color:'green',
+        schedule:{type:'daily',days:[1,2,3,4,5,6,7],startDate:dkey(start),endDate:''},
+        reminders:[{time:'12:00'},{time:'17:00'}]},
+      {name:'5 порций овощей/фруктов', cat:'tpl-health', color:'green',
+        schedule:{type:'daily',days:[1,2,3,4,5,6,7],startDate:dkey(start),endDate:''},
+        reminders:[]},
+      {name:'10 000 шагов', cat:'tpl-health', color:'teal',
+        schedule:{type:'daily',days:[1,2,3,4,5,6,7],startDate:dkey(start),endDate:''},
+        reminders:[]},
+      {name:'Сон до 23:30', cat:'tpl-sleep', color:'purple',
+        schedule:{type:'daily',days:[1,2,3,4,5,6,7],startDate:dkey(start),endDate:''},
+        reminders:[{time:'23:00'}]},
+      {name:'Без сахара / фастфуда', cat:'tpl-health', color:'green',
+        schedule:{type:'daily',days:[1,2,3,4,5,6,7],startDate:dkey(start),endDate:dateFromOffset(start,28)},
+        reminders:[]},
+    ],
+  };
+}
+
+/* ============================================================
+   ГАЛЕРЕЯ ШАБЛОНОВ
+   ============================================================ */
+const TEMPLATES = [
+  {
+    id:'magistratura', icon:'🎓',
+    name:'План подготовки в магистратуру',
+    desc:'47 событий, 32 задачи, 8 напоминаний, 2 привычки. Июнь–август 2026: ВКР, Stepik, математика, кейсы, экзамены ВШЭ/ИТМО/МИФИ.',
+    badge:'Фиксированные даты 2026',
+    apply: loadViktorTemplate,
+  },
+  {
+    id:'strength', icon:'💪',
+    name:'Силовая 5/3/1 (4 недели)',
+    desc:'16 тренировок по программе Уэндлера: жим лёжа, присед, жим стоя, становая. Привычки: растяжка, вода. Стартует со следующего понедельника.',
+    badge:'4 недели · 16 тренировок',
+    apply: () => applyDynamicTemplate(buildStrengthTemplate(), 'Силовая 5/3/1'),
+  },
+  {
+    id:'halfmarathon', icon:'🏃',
+    name:'Полумарафон за 8 недель',
+    desc:'31 пробежка с прогрессией от 5 до 21 км, длинные забеги по воскресеньям. Финал — забег 21.1 км. Привычки: утренний бег + растяжка.',
+    badge:'8 недель · 21.1 км',
+    apply: () => applyDynamicTemplate(buildHalfMarathonTemplate(), 'Полумарафон 8 недель'),
+  },
+  {
+    id:'english', icon:'🇬🇧',
+    name:'Английский за 60 дней',
+    desc:'Anki + подкасты + чтение каждый день, чекпоинты на 2/4/6 неделях, финал — IELTS Mock Test. 3 ежедневные привычки.',
+    badge:'60 дней · IELTS mock',
+    apply: () => applyDynamicTemplate(buildEnglishTemplate(), 'Английский 60 дней'),
+  },
+  {
+    id:'reading', icon:'📚',
+    name:'30 дней чтения',
+    desc:'30 минут чтения каждый день + 4 книги по расписанию. Привычка «без телефона за час до сна».',
+    badge:'30 дней · 4 книги',
+    apply: () => applyDynamicTemplate(buildReadingTemplate(), '30 дней чтения'),
+  },
+  {
+    id:'health', icon:'🥗',
+    name:'Здоровое питание и ритм',
+    desc:'Еженедельная закупка по списку, финал — взвешивание через месяц. 5 привычек: вода, овощи, шаги, сон, без сахара.',
+    badge:'4 недели · 5 привычек',
+    apply: () => applyDynamicTemplate(buildHealthTemplate(), 'Здоровое питание'),
+  },
+];
+
+function applyDynamicTemplate(tpl, niceName){
+  const counts = `${tpl.events?.length||0} событий, ${tpl.tasks?.length||0} задач, ${tpl.habits?.length||0} привычек, ${tpl.reminders?.length||0} напоминаний`;
+  if(!confirm(`Загрузить шаблон «${niceName}»?\n\n${counts}\n\nСтартует с ближайшего понедельника. Текущие данные не пострадают.`)) return;
+  applyTemplateCore(tpl);
+  toast(`✓ Шаблон «${niceName}» загружен`);
   showTab(activeTab);
 }
 
