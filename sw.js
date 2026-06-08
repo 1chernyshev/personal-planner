@@ -1,10 +1,14 @@
 /* Atlas Service Worker — offline + instant load */
-const CACHE = 'atlas-v5';
+const CACHE = 'atlas-v6';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png',
+  './favicon-32.png',
+  './favicon-64.png',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
 ];
 
