@@ -9,126 +9,414 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Atlas">
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link rel="preconnect" href="https://ploroaresanhqttynroq.supabase.co">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://ploroaresanhqttynroq.supabase.co" crossorigin>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="dns-prefetch" href="https://ploroaresanhqttynroq.supabase.co">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async crossorigin></script>
 <style>
 :root{
-  --bg:#ffffff;--bg2:#f8f8f6;--bg3:#f1f0ec;--bg4:#e9e8e3;
-  --text:#1a1a18;--text2:#6b6b68;--text3:#9b9b97;
-  --border:#e0dfd9;--border2:#c8c7c0;
-  --blue:#378ADD;--blue-bg:#E6F1FB;--blue-text:#0C447C;
-  --purple:#7F77DD;--purple-bg:#EEEDFE;--purple-text:#3C3489;
-  --green:#639922;--green-bg:#EAF3DE;--green-text:#27500A;
-  --teal:#1D9E75;--teal-bg:#E1F5EE;--teal-text:#085041;
-  --amber:#EF9F27;--amber-bg:#FAEEDA;--amber-text:#633806;
-  --pink:#D4537E;--pink-bg:#FBEAF0;--pink-text:#72243E;
-  --red:#E24B4A;--red-bg:#FCEBEB;--red-text:#791F1F;
-  --gray:#8A8A85;--gray-bg:#EFEFEC;--gray-text:#3A3A38;
-  --radius:8px;--radius-lg:12px;
-  --shadow:0 1px 3px rgba(0,0,0,.06);--shadow-lg:0 4px 16px rgba(0,0,0,.08);
+  /* === ATLAS BRAND PALETTE ===
+     Royal blue (Chelsea) · Cream white (Real Madrid) · Subtle neon cyan accents */
+  --royal:        #034694;
+  --royal-deep:   #0a1f44;
+  --royal-light:  #1e3a8a;
+  --cream:        #fbf7ed;
+  --cream-soft:   #f3ede0;
+  --cream-bright: #ffffff;
+  --neon:         #00f5ff;
+  --neon-soft:    rgba(0,245,255,.35);
+  --neon-glow:    0 0 22px rgba(0,245,255,.28);
+
+  /* Text */
+  --text:  #0a1f44;
+  --text2: rgba(10,31,68,.62);
+  --text3: rgba(10,31,68,.38);
+
+  /* Surfaces */
+  --bg:  var(--cream);
+  --bg2: var(--cream-soft);
+  --bg3: rgba(243,237,224,.55);
+  --bg4: rgba(10,31,68,.04);
+
+  /* Borders */
+  --border:        rgba(10,31,68,.08);
+  --border2:       rgba(10,31,68,.16);
+
+  /* Liquid glass */
+  --glass:         rgba(255,255,255,.62);
+  --glass-strong:  rgba(255,255,255,.88);
+  --glass-border:  rgba(255,255,255,.55);
+  --glass-blur:    28px;
+  --glass-shadow:  0 8px 32px rgba(10,31,68,.10), 0 1px 2px rgba(10,31,68,.06);
+  --glass-shadow-lg: 0 18px 56px rgba(10,31,68,.18), 0 2px 4px rgba(10,31,68,.08);
+
+  /* Legacy category colours mapped onto brand */
+  --blue:#034694;     --blue-bg:rgba(3,70,148,.10);     --blue-text:#0a1f44;
+  --purple:#6c5ce7;   --purple-bg:rgba(108,92,231,.12);  --purple-text:#2d2580;
+  --green:#00b894;    --green-bg:rgba(0,184,148,.12);    --green-text:#005a47;
+  --teal:#00d4ff;     --teal-bg:rgba(0,212,255,.12);     --teal-text:#005a73;
+  --amber:#ef9f27;    --amber-bg:rgba(239,159,39,.14);   --amber-text:#7a4a08;
+  --pink:#d63384;     --pink-bg:rgba(214,51,132,.12);    --pink-text:#6c1c43;
+  --red:#e17055;      --red-bg:rgba(225,112,85,.14);     --red-text:#7a2f1a;
+  --gray:#636e72;     --gray-bg:rgba(99,110,114,.10);    --gray-text:#2d3436;
+
+  /* Radii & motion */
+  --radius-sm: 8px;
+  --radius:    14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --ease:        cubic-bezier(.16,1,.3,1);
+  --ease-bounce: cubic-bezier(.34,1.56,.64,1);
+  --shadow:      0 1px 3px rgba(10,31,68,.06);
+  --shadow-lg:   var(--glass-shadow-lg);
 }
 [data-theme="dark"]{
-  --bg:#1c1c1a;--bg2:#252522;--bg3:#2d2d29;--bg4:#363632;
-  --text:#f0eee8;--text2:#a8a8a3;--text3:#7a7a76;
-  --border:#3a3a36;--border2:#4a4a45;
-  --blue-bg:#0d2b47;--blue-text:#8bb8ea;
-  --purple-bg:#241f3f;--purple-text:#b1a8ef;
-  --green-bg:#1a2b10;--green-text:#a4cd6e;
-  --teal-bg:#0d2820;--teal-text:#5fc8a3;
-  --amber-bg:#3a2a10;--amber-text:#f0bc6e;
-  --pink-bg:#2f1620;--pink-text:#ea9bb5;
-  --red-bg:#311414;--red-text:#ea8a89;
-  --gray-bg:#2c2c29;--gray-text:#bcbcb7;
+  --royal:        #1e3a8a;
+  --royal-deep:   #05122b;
+  --cream:        #0d1830;
+  --cream-soft:   #16213d;
+  --cream-bright: #e8e3d4;
+
+  --text:  #f1ecdb;
+  --text2: rgba(241,236,219,.7);
+  --text3: rgba(241,236,219,.42);
+
+  --bg:  #05122b;
+  --bg2: #0d1830;
+  --bg3: rgba(22,33,61,.55);
+  --bg4: rgba(255,255,255,.04);
+
+  --border:  rgba(255,255,255,.08);
+  --border2: rgba(255,255,255,.18);
+
+  --glass:         rgba(20,35,70,.55);
+  --glass-strong:  rgba(20,35,70,.85);
+  --glass-border:  rgba(255,255,255,.12);
+  --glass-shadow:  0 8px 32px rgba(0,0,0,.45);
+  --glass-shadow-lg: 0 18px 56px rgba(0,0,0,.6);
+
+  --blue-bg:rgba(3,70,148,.30);     --blue-text:#9bc1ee;
+  --purple-bg:rgba(108,92,231,.25); --purple-text:#c2b8ff;
+  --green-bg:rgba(0,184,148,.22);   --green-text:#7fe1c2;
+  --teal-bg:rgba(0,212,255,.22);    --teal-text:#7ee3ff;
+  --amber-bg:rgba(239,159,39,.25);  --amber-text:#f5c87a;
+  --pink-bg:rgba(214,51,132,.25);   --pink-text:#f7a4cb;
+  --red-bg:rgba(225,112,85,.25);    --red-text:#f0a795;
+  --gray-bg:rgba(255,255,255,.06);  --gray-text:#bcc1c4;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;background:var(--bg3);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
-button{font-family:inherit;color:inherit}
-input,textarea,select{font-family:inherit;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;width:100%;outline:none;transition:border-color .15s}
-input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+html,body{min-height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Inter,sans-serif;
+  color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(ellipse 90vw 70vh at 8% -10%,  rgba(3,70,148,.10),  transparent 60%),
+    radial-gradient(ellipse 70vw 60vh at 110% 20%, rgba(0,245,255,.05), transparent 60%),
+    radial-gradient(ellipse 80vw 60vh at 50% 110%, rgba(3,70,148,.06),  transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+  letter-spacing:-.005em;
+}
+[data-theme="dark"] body{
+  background:
+    radial-gradient(ellipse 90vw 70vh at 8% -10%,  rgba(30,58,138,.45), transparent 60%),
+    radial-gradient(ellipse 70vw 60vh at 110% 20%, rgba(0,245,255,.08), transparent 60%),
+    radial-gradient(ellipse 80vw 60vh at 50% 110%, rgba(30,58,138,.25), transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+button{font-family:inherit;color:inherit;cursor:pointer;transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .25s var(--ease),opacity .2s var(--ease)}
+input,textarea,select{
+  font-family:inherit;font-size:14px;color:var(--text);
+  background:var(--glass);
+  backdrop-filter:blur(12px) saturate(160%);
+  -webkit-backdrop-filter:blur(12px) saturate(160%);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:10px 12px;width:100%;outline:none;
+  transition:border-color .25s var(--ease),box-shadow .25s var(--ease),background .25s var(--ease);
+}
+input:focus,textarea:focus,select:focus{
+  border-color:var(--royal);
+  box-shadow:0 0 0 3px rgba(3,70,148,.12), var(--neon-glow);
+  background:var(--glass-strong);
+}
 textarea{resize:vertical;min-height:80px;line-height:1.5}
-::-webkit-scrollbar{width:8px;height:8px}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:rgba(10,31,68,.18);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(10,31,68,.32);background-clip:padding-box}
 ::-webkit-scrollbar-track{background:transparent}
 
+/* Liquid glass mixins (utility classes) */
+.glass{
+  background:var(--glass);
+  backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  border:1px solid var(--glass-border);
+  box-shadow:var(--glass-shadow);
+}
+.glass-strong{
+  background:var(--glass-strong);
+  backdrop-filter:blur(40px) saturate(200%);
+  -webkit-backdrop-filter:blur(40px) saturate(200%);
+  border:1px solid var(--glass-border);
+  box-shadow:var(--glass-shadow-lg);
+}
+
+/* Selection */
+::selection{background:rgba(0,245,255,.3);color:var(--text)}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+
 /* LAYOUT */
-.app{max-width:1300px;margin:0 auto;padding:18px 16px 100px}
-.app-header{display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap}
-.app-title{font-size:22px;font-weight:600;letter-spacing:-.01em}
-.app-sub{color:var(--text2);font-size:13px;margin-bottom:18px}
-.header-actions{margin-left:auto;display:flex;gap:6px}
-.icon-btn-sm{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px;cursor:pointer;font-size:12px;color:var(--text2)}
-.icon-btn-sm:hover{background:var(--bg2);color:var(--text)}
-.notif-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red);margin-left:4px;vertical-align:middle}
+.app{max-width:1300px;margin:0 auto;padding:20px 18px 110px;animation:fadeUp .55s var(--ease) both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.app-header{display:flex;align-items:center;gap:14px;margin-bottom:8px;flex-wrap:wrap}
+.app-title{
+  font-size:26px;font-weight:700;letter-spacing:-.02em;
+  background:linear-gradient(135deg,var(--royal-deep) 0%,var(--royal) 65%,var(--royal-light) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  display:inline-flex;align-items:center;gap:8px;
+}
+[data-theme="dark"] .app-title{
+  background:linear-gradient(135deg,var(--cream-bright) 0%,var(--cream) 65%,var(--neon) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.app-sub{color:var(--text2);font-size:13px;margin-bottom:22px;font-weight:500}
+.header-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.icon-btn-sm{
+  background:var(--glass);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--glass-border);
+  border-radius:12px;padding:8px 12px;font-size:13px;color:var(--text2);
+}
+.icon-btn-sm:hover{background:var(--glass-strong);color:var(--text);transform:translateY(-1px)}
+.notif-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red);margin-left:4px;vertical-align:middle;box-shadow:0 0 6px var(--red)}
 
-/* TABS */
-.tabs{display:flex;gap:2px;background:var(--bg3);border-radius:var(--radius);padding:3px;border:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap}
-.tab{padding:7px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);border:none;background:transparent;transition:all .15s;white-space:nowrap}
-.tab:hover{color:var(--text)}
-.tab.active{background:var(--bg);color:var(--text);box-shadow:var(--shadow)}
+/* TABS — segmented glass */
+.tabs{
+  display:flex;gap:4px;
+  background:var(--glass);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-radius:var(--radius);
+  padding:5px;
+  border:1px solid var(--glass-border);
+  box-shadow:var(--glass-shadow);
+  margin-bottom:24px;flex-wrap:wrap;
+}
+.tab{
+  padding:8px 16px;border-radius:10px;
+  cursor:pointer;font-size:13px;font-weight:500;
+  color:var(--text2);border:none;background:transparent;
+  white-space:nowrap;transition:all .35s var(--ease);
+  position:relative;
+}
+.tab:hover{color:var(--text);background:rgba(10,31,68,.04)}
+.tab.active{
+  background:var(--cream-bright);
+  color:var(--royal);
+  box-shadow:0 2px 8px rgba(10,31,68,.10), 0 0 0 1px rgba(255,255,255,.5) inset;
+  font-weight:600;
+}
+[data-theme="dark"] .tab.active{
+  background:rgba(255,255,255,.08);
+  color:var(--cream-bright);
+}
 
-/* GENERIC CARDS */
-.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px}
-.card-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
-.empty{text-align:center;padding:32px 16px;color:var(--text3);font-size:13px}
+/* GENERIC CARDS — glass surface */
+.card{
+  background:var(--glass);
+  backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-lg);
+  padding:18px;
+  box-shadow:var(--glass-shadow);
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease);
+}
+.card-title{
+  font-size:11px;font-weight:700;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;
+}
+.empty{text-align:center;padding:36px 16px;color:var(--text3);font-size:13px}
 
-.btn-primary{padding:7px 14px;border-radius:var(--radius);border:1px solid var(--blue);background:var(--blue);color:#fff;cursor:pointer;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
-.btn-primary:hover{opacity:.9}
-.btn-secondary{padding:7px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:13px;color:var(--text)}
-.btn-secondary:hover{background:var(--bg2)}
-.btn-danger{padding:7px 14px;border-radius:var(--radius);border:1px solid var(--red);background:var(--bg);color:var(--red);cursor:pointer;font-size:13px}
-.btn-danger:hover{background:var(--red-bg)}
-.btn-ghost{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:4px 6px;border-radius:4px}
-.btn-ghost:hover{background:var(--bg3);color:var(--text)}
+/* Buttons */
+.btn-primary{
+  padding:9px 18px;border-radius:var(--radius);
+  border:1px solid transparent;
+  background:linear-gradient(135deg, var(--royal) 0%, var(--royal-light) 100%);
+  color:var(--cream-bright);font-size:13px;font-weight:600;
+  display:inline-flex;align-items:center;gap:6px;
+  box-shadow:0 4px 14px rgba(3,70,148,.30), 0 0 0 1px rgba(255,255,255,.12) inset;
+  letter-spacing:.01em;
+}
+.btn-primary:hover{
+  transform:translateY(-1px);
+  box-shadow:0 6px 20px rgba(3,70,148,.40), 0 0 18px rgba(0,245,255,.20), 0 0 0 1px rgba(255,255,255,.18) inset;
+}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{
+  padding:9px 16px;border-radius:var(--radius);
+  border:1px solid var(--glass-border);
+  background:var(--glass);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  font-size:13px;color:var(--text);font-weight:500;
+}
+.btn-secondary:hover{
+  background:var(--glass-strong);
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(10,31,68,.08);
+}
+.btn-danger{
+  padding:9px 16px;border-radius:var(--radius);
+  border:1px solid rgba(225,112,85,.4);
+  background:rgba(225,112,85,.08);
+  color:var(--red);font-size:13px;font-weight:500;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.btn-danger:hover{background:rgba(225,112,85,.16);transform:translateY(-1px)}
+.btn-ghost{background:transparent;border:none;color:var(--text3);font-size:14px;padding:6px 8px;border-radius:8px}
+.btn-ghost:hover{background:rgba(10,31,68,.06);color:var(--text)}
 
 /* CALENDAR */
 .cal-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .cal-nav{display:flex;gap:4px;align-items:center}
-.cal-nav button{padding:6px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:13px}
-.cal-nav button:hover{background:var(--bg2)}
-.cal-label{font-size:16px;font-weight:600;min-width:200px;text-align:center}
-.cal-view-switch{display:flex;background:var(--bg3);border-radius:var(--radius);padding:2px;border:1px solid var(--border)}
-.cal-view-switch button{padding:5px 12px;border:none;background:transparent;cursor:pointer;font-size:12px;border-radius:5px;color:var(--text2)}
-.cal-view-switch button.active{background:var(--bg);color:var(--text);box-shadow:var(--shadow)}
+.cal-nav button{
+  padding:8px 14px;border-radius:12px;
+  border:1px solid var(--glass-border);background:var(--glass);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  font-size:13px;color:var(--text);font-weight:500;
+}
+.cal-nav button:hover{background:var(--glass-strong);transform:translateY(-1px)}
+.cal-label{font-size:18px;font-weight:700;min-width:220px;text-align:center;letter-spacing:-.01em}
+.cal-view-switch{
+  display:flex;background:var(--glass);border-radius:12px;padding:3px;
+  border:1px solid var(--glass-border);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.cal-view-switch button{padding:6px 14px;border:none;background:transparent;font-size:12px;border-radius:9px;color:var(--text2);font-weight:500}
+.cal-view-switch button.active{background:var(--cream-bright);color:var(--royal);box-shadow:0 1px 4px rgba(10,31,68,.10);font-weight:600}
+[data-theme="dark"] .cal-view-switch button.active{background:rgba(255,255,255,.10);color:var(--cream-bright)}
 
-.month-grid{display:grid;grid-template-columns:repeat(7,1fr);background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
-.mg-head{padding:10px 8px;background:var(--bg2);border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;text-align:center}
+.month-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  background:var(--glass);
+  backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-lg);overflow:hidden;
+  box-shadow:var(--glass-shadow);
+}
+.mg-head{
+  padding:11px 8px;
+  background:rgba(10,31,68,.04);
+  border-bottom:1px solid var(--border);border-right:1px solid var(--border);
+  font-size:11px;font-weight:700;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.08em;text-align:center;
+}
 .mg-head:last-child{border-right:none}
-.mg-day{min-height:110px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:6px;cursor:pointer;position:relative;transition:background .15s;overflow:hidden}
-.mg-day:hover{background:var(--bg2)}
-.mg-day.outside{background:var(--bg2);color:var(--text3)}
+.mg-day{
+  min-height:118px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:8px;cursor:pointer;position:relative;overflow:hidden;
+  transition:background .25s var(--ease);
+}
+.mg-day:hover{background:rgba(3,70,148,.04)}
+.mg-day.outside{background:rgba(10,31,68,.02);color:var(--text3)}
 .mg-day.outside .mg-num{color:var(--text3)}
-.mg-day.today .mg-num{background:var(--blue);color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-weight:600}
-.mg-num{font-size:12px;font-weight:500;color:var(--text);display:inline-block;line-height:1.4}
-.mg-events{margin-top:4px;display:flex;flex-direction:column;gap:2px}
-.mg-event{font-size:10px;padding:2px 5px;border-radius:3px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid transparent;cursor:pointer}
-.mg-event:hover{filter:brightness(.97)}
+.mg-day.today{
+  background:radial-gradient(ellipse at top,rgba(3,70,148,.06),transparent 70%);
+}
+.mg-day.today .mg-num{
+  background:linear-gradient(135deg,var(--royal),var(--royal-light));
+  color:var(--cream-bright);
+  border-radius:50%;width:24px;height:24px;
+  display:inline-flex;align-items:center;justify-content:center;font-weight:700;
+  box-shadow:0 2px 8px rgba(3,70,148,.35);
+}
+.mg-num{font-size:12px;font-weight:600;color:var(--text);display:inline-block;line-height:1.4}
+.mg-events{margin-top:5px;display:flex;flex-direction:column;gap:3px}
+.mg-event{
+  font-size:10px;padding:3px 6px;border-radius:6px;font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  border-left:3px solid transparent;cursor:pointer;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  transition:transform .2s var(--ease);
+}
+.mg-event:hover{transform:translateX(2px)}
 .mg-event.done-ev{opacity:.4;text-decoration:line-through}
-.mg-more{font-size:9px;color:var(--text3);padding:1px 4px;font-weight:500}
+.mg-more{font-size:9px;color:var(--text3);padding:2px 4px;font-weight:600}
 .mg-day:nth-child(7n){border-right:none}
 
-.week-grid{display:grid;grid-template-columns:52px repeat(7,1fr);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--bg)}
-.wg-head{text-align:center;padding:8px 2px;background:var(--bg2);border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-size:11px;font-weight:600;color:var(--text2);cursor:pointer}
-.wg-head:hover{background:var(--bg3)}
-.wg-head.today{background:var(--blue-bg);color:var(--blue-text)}
+.week-grid{
+  display:grid;grid-template-columns:56px repeat(7,1fr);
+  border:1px solid var(--glass-border);border-radius:var(--radius-lg);overflow:hidden;
+  background:var(--glass);
+  backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  box-shadow:var(--glass-shadow);
+}
+.wg-head{
+  text-align:center;padding:10px 2px;
+  background:rgba(10,31,68,.04);
+  border-bottom:1px solid var(--border);border-right:1px solid var(--border);
+  font-size:11px;font-weight:700;color:var(--text2);cursor:pointer;
+  text-transform:uppercase;letter-spacing:.06em;
+  transition:background .25s var(--ease);
+}
+.wg-head:hover{background:rgba(3,70,148,.08)}
+.wg-head.today{
+  background:linear-gradient(180deg,rgba(3,70,148,.10),rgba(3,70,148,.04));
+  color:var(--royal);
+}
 .wg-head:last-child{border-right:none}
-.wg-time{font-size:10px;color:var(--text3);text-align:right;padding:0 6px;border-right:1px solid var(--border);height:52px;display:flex;align-items:flex-start;padding-top:4px;justify-content:flex-end;background:var(--bg2)}
-.wg-cell{height:52px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;cursor:pointer}
-.wg-cell:hover{background:var(--bg2)}
+.wg-time{
+  font-size:10px;color:var(--text3);text-align:right;padding:4px 8px 0;
+  border-right:1px solid var(--border);height:54px;
+  display:flex;align-items:flex-start;justify-content:flex-end;
+  background:rgba(10,31,68,.02);font-variant-numeric:tabular-nums;
+}
+.wg-cell{
+  height:54px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+  position:relative;cursor:pointer;transition:background .2s var(--ease);
+}
+.wg-cell:hover{background:rgba(3,70,148,.04)}
 .wg-cell:last-child{border-right:none}
-.wg-event{position:absolute;left:2px;right:2px;border-radius:4px;padding:3px 5px;font-size:10px;font-weight:500;overflow:hidden;cursor:pointer;line-height:1.3;border-left:3px solid transparent;z-index:2}
-.wg-event:hover{filter:brightness(.97);box-shadow:var(--shadow-lg)}
+.wg-event{
+  position:absolute;left:3px;right:3px;
+  border-radius:8px;padding:4px 7px;
+  font-size:10px;font-weight:500;overflow:hidden;cursor:pointer;line-height:1.3;
+  border-left:3px solid transparent;z-index:2;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  transition:transform .25s var(--ease),box-shadow .25s var(--ease);
+}
+.wg-event:hover{transform:translateX(2px) scale(1.02);box-shadow:var(--glass-shadow-lg);z-index:5}
 .wg-event.done-ev{opacity:.4;text-decoration:line-through}
 
-.day-view{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px}
-.day-event{display:flex;gap:12px;padding:10px;border-radius:var(--radius);margin-bottom:8px;border-left:4px solid;cursor:pointer}
-.day-event:hover{transform:translateX(2px);transition:transform .1s}
+.day-view{
+  background:var(--glass);
+  backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-lg);padding:18px;
+  box-shadow:var(--glass-shadow);
+}
+.day-event{
+  display:flex;gap:14px;padding:12px 14px;border-radius:var(--radius);margin-bottom:8px;
+  border-left:4px solid;cursor:pointer;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease);
+}
+.day-event:hover{transform:translateX(3px);box-shadow:0 4px 14px rgba(10,31,68,.10)}
 .day-event.done-ev{opacity:.5;text-decoration:line-through}
-.day-event-time{font-size:12px;font-weight:600;color:var(--text2);min-width:80px;font-variant-numeric:tabular-nums}
+.day-event-time{font-size:12px;font-weight:700;color:var(--royal);min-width:96px;font-variant-numeric:tabular-nums;letter-spacing:.01em}
 .day-event-body{flex:1}
-.day-event-title{font-weight:500;margin-bottom:2px}
+.day-event-title{font-weight:600;margin-bottom:3px;letter-spacing:-.005em}
 .day-event-meta{font-size:11px;color:var(--text3)}
 
 .cat-blue{background:var(--blue-bg);color:var(--blue-text);border-left-color:var(--blue)}
@@ -143,12 +431,28 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 /* SPLIT LAYOUT (used for Tasks / Reminders / Workspace) */
 .split{display:grid;grid-template-columns:240px 1fr;gap:16px;align-items:flex-start}
 @media(max-width:760px){.split{grid-template-columns:1fr}}
-.sidebar{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px;position:sticky;top:14px;max-height:calc(100vh - 40px);overflow-y:auto}
+.sidebar{
+  background:var(--glass);
+  backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-lg);padding:12px;
+  position:sticky;top:14px;max-height:calc(100vh - 40px);overflow-y:auto;
+  box-shadow:var(--glass-shadow);
+}
 .side-section{margin-bottom:14px}
 .side-section-title{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:4px 8px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
-.side-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text);user-select:none}
-.side-item:hover{background:var(--bg2)}
-.side-item.active{background:var(--blue-bg);color:var(--blue-text);font-weight:500}
+.side-item{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;
+  cursor:pointer;font-size:13px;color:var(--text);user-select:none;
+  transition:background .25s var(--ease),transform .2s var(--ease);
+}
+.side-item:hover{background:rgba(3,70,148,.06);transform:translateX(2px)}
+.side-item.active{
+  background:linear-gradient(135deg,rgba(3,70,148,.14),rgba(3,70,148,.08));
+  color:var(--royal);font-weight:600;
+  box-shadow:0 1px 3px rgba(3,70,148,.08), inset 0 0 0 1px rgba(3,70,148,.10);
+}
 .side-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .side-count{margin-left:auto;font-size:11px;color:var(--text3);background:var(--bg3);padding:1px 6px;border-radius:8px}
 .side-item.active .side-count{background:var(--bg);color:var(--blue-text)}
@@ -161,19 +465,53 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .panel-sub{font-size:12px;color:var(--text2);margin-top:2px}
 
 /* TASKS */
-.task-quick-add{display:flex;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:8px 10px;margin-bottom:12px;align-items:center}
-.task-quick-add input{border:none;padding:6px 4px}
-.task-quick-add input:focus{border:none}
+.task-quick-add{
+  display:flex;gap:6px;
+  background:var(--glass);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:8px 10px;margin-bottom:14px;align-items:center;
+  box-shadow:var(--glass-shadow);
+  transition:box-shadow .25s var(--ease);
+}
+.task-quick-add:focus-within{box-shadow:0 0 0 3px rgba(3,70,148,.10), var(--glass-shadow)}
+.task-quick-add input{border:none;padding:6px 4px;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+.task-quick-add input:focus{border:none;box-shadow:none;background:transparent}
 .task-section{margin-bottom:18px}
 .task-section-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-left:4px}
-.task-row{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:border-color .15s}
-.task-row:hover{border-color:var(--border2)}
+.task-row{
+  background:var(--glass);
+  backdrop-filter:blur(16px) saturate(180%);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;cursor:pointer;
+  transition:transform .25s var(--ease),box-shadow .25s var(--ease),background .25s var(--ease);
+}
+.task-row:hover{
+  transform:translateY(-1px);
+  background:var(--glass-strong);
+  box-shadow:0 4px 14px rgba(10,31,68,.08);
+}
 .task-row.done{opacity:.55}
 .task-row.done .task-row-title{text-decoration:line-through}
 .task-row-main{display:flex;gap:10px;align-items:flex-start}
-.task-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;color:transparent}
-.task-check:hover{border-color:var(--blue)}
-.task-check.checked{background:var(--teal);border-color:var(--teal);color:#fff}
+.task-check{
+  width:20px;height:20px;border-radius:50%;
+  border:1.5px solid var(--border2);
+  flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;cursor:pointer;color:transparent;
+  background:var(--glass);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  transition:all .3s var(--ease-bounce);
+}
+.task-check:hover{border-color:var(--royal);transform:scale(1.1)}
+.task-check.checked{
+  background:linear-gradient(135deg,var(--green),#00e1b0);
+  border-color:transparent;color:#fff;
+  box-shadow:0 2px 8px rgba(0,184,148,.30);
+}
 .task-row-body{flex:1;min-width:0}
 .task-row-title{font-size:13px;font-weight:500;word-wrap:break-word}
 .task-row-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--text3);margin-top:3px}
@@ -190,7 +528,16 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .subtask.done{opacity:.5;text-decoration:line-through}
 
 /* HABITS */
-.habit-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px}
+.habit-card{
+  background:var(--glass);
+  backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:12px;
+  box-shadow:var(--glass-shadow);
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease);
+}
+.habit-card:hover{transform:translateY(-1px);box-shadow:var(--glass-shadow-lg)}
 .habit-top{display:flex;align-items:center;gap:12px}
 .habit-color{width:10px;height:36px;border-radius:3px;flex-shrink:0}
 .habit-info{flex:1;min-width:0}
@@ -199,10 +546,22 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .habit-streak{color:var(--amber);font-weight:600}
 .habit-actions{display:flex;gap:4px}
 .habit-grid{margin-top:12px;display:grid;grid-template-columns:repeat(14,1fr);gap:4px;max-width:520px}
-.habit-cell{aspect-ratio:1;border-radius:4px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text3);position:relative}
-.habit-cell.scheduled{background:var(--bg);border-style:dashed}
-.habit-cell.done{background:var(--teal);border-color:var(--teal);color:#fff}
-.habit-cell.today{box-shadow:0 0 0 2px var(--blue);z-index:1}
+.habit-cell{
+  aspect-ratio:1;border-radius:6px;
+  background:rgba(10,31,68,.06);
+  border:1px solid var(--border);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--text3);position:relative;
+  transition:all .3s var(--ease-bounce);
+}
+.habit-cell.scheduled{background:rgba(255,255,255,.4);border-style:dashed;border-color:rgba(3,70,148,.18)}
+.habit-cell.done{
+  background:linear-gradient(135deg,var(--green),#00e1b0);
+  border-color:transparent;color:#fff;
+  box-shadow:0 2px 8px rgba(0,184,148,.30);
+}
+.habit-cell:hover:not(.future){transform:scale(1.1)}
+.habit-cell.today{box-shadow:0 0 0 2px var(--royal), var(--neon-glow);z-index:1}
 .habit-cell.future{opacity:.35;cursor:default}
 .habit-cell-label{position:absolute;top:-14px;left:0;right:0;font-size:8px;color:var(--text3);text-align:center}
 
@@ -255,10 +614,25 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .ws-add-block button:hover{background:var(--bg3);color:var(--text)}
 
 /* REMINDERS */
-.rem-quick{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:8px 10px;margin-bottom:12px;display:flex;gap:6px;align-items:center}
-.rem-quick input{border:none;padding:6px 4px}
-.rem-quick input:focus{border:none}
-.rem-row{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:6px;cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+.rem-quick{
+  background:var(--glass);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:8px 10px;margin-bottom:14px;display:flex;gap:6px;align-items:center;
+  box-shadow:var(--glass-shadow);
+}
+.rem-quick input{border:none;padding:6px 4px;background:transparent;box-shadow:none}
+.rem-quick input:focus{border:none;background:transparent;box-shadow:none}
+.rem-row{
+  background:var(--glass);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;cursor:pointer;
+  display:flex;gap:12px;align-items:flex-start;
+  transition:transform .25s var(--ease),box-shadow .25s var(--ease);
+}
+.rem-row:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(10,31,68,.08)}
 .rem-row.done{opacity:.55}
 .rem-row.done .rem-title{text-decoration:line-through}
 .rem-body{flex:1;min-width:0}
@@ -269,10 +643,27 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .rem-when.soon{background:var(--amber-bg);color:var(--amber-text)}
 .rem-when.passed{text-decoration:line-through;color:var(--text3)}
 
-/* MODAL */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:16px}
+/* MODAL — glass */
+.modal-bg{
+  display:none;position:fixed;inset:0;
+  background:rgba(10,31,68,.42);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  z-index:100;align-items:center;justify-content:center;padding:16px;
+  animation:modalBgIn .25s var(--ease);
+}
 .modal-bg.open{display:flex}
-.modal{background:var(--bg);border-radius:var(--radius-lg);padding:24px;max-width:540px;width:100%;border:1px solid var(--border);max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+@keyframes modalBgIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:var(--glass-strong);
+  backdrop-filter:blur(40px) saturate(200%);
+  -webkit-backdrop-filter:blur(40px) saturate(200%);
+  border-radius:var(--radius-lg);padding:28px;max-width:560px;width:100%;
+  border:1px solid var(--glass-border);
+  max-height:90vh;overflow-y:auto;
+  box-shadow:var(--glass-shadow-lg);
+  animation:modalIn .35s var(--ease-bounce);
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
 .modal h3{font-size:17px;font-weight:600;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
 .modal-close{background:transparent;border:none;font-size:22px;color:var(--text3);cursor:pointer;line-height:1;padding:0 4px}
 .modal-close:hover{color:var(--text)}
@@ -308,13 +699,47 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .radio-opt{padding:6px 12px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);cursor:pointer;font-size:12px;color:var(--text2)}
 .radio-opt.selected{background:var(--blue-bg);border-color:var(--blue);color:var(--blue-text);font-weight:500}
 
-/* FAB */
-.fab{position:fixed;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:28px;cursor:pointer;box-shadow:var(--shadow-lg);z-index:50;display:flex;align-items:center;justify-content:center}
-.fab:hover{transform:scale(1.05);transition:transform .15s}
+/* FAB — royal blue glass pill with subtle neon halo */
+.fab{
+  position:fixed;bottom:28px;right:28px;
+  width:60px;height:60px;border-radius:50%;
+  background:linear-gradient(135deg,var(--royal) 0%,var(--royal-light) 100%);
+  color:var(--cream-bright);border:1px solid rgba(255,255,255,.18);
+  font-size:30px;font-weight:300;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:
+    0 10px 32px rgba(3,70,148,.35),
+    0 0 0 1px rgba(255,255,255,.10) inset,
+    0 0 30px rgba(0,245,255,.18);
+  z-index:50;
+  animation:fabPulse 3.5s ease-in-out infinite;
+}
+.fab:hover{
+  transform:translateY(-2px) scale(1.04);
+  box-shadow:
+    0 14px 38px rgba(3,70,148,.45),
+    0 0 0 1px rgba(255,255,255,.16) inset,
+    0 0 42px rgba(0,245,255,.32);
+}
+.fab:active{transform:scale(.98)}
+@keyframes fabPulse{
+  0%,100%{box-shadow:0 10px 32px rgba(3,70,148,.35), 0 0 0 1px rgba(255,255,255,.10) inset, 0 0 30px rgba(0,245,255,.18)}
+  50%   {box-shadow:0 12px 36px rgba(3,70,148,.40), 0 0 0 1px rgba(255,255,255,.10) inset, 0 0 42px rgba(0,245,255,.30)}
+}
 
 /* TOAST */
-.toast{position:fixed;bottom:90px;right:24px;background:var(--text);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:13px;z-index:200;animation:slideIn .2s;max-width:320px;box-shadow:var(--shadow-lg)}
-@keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast{
+  position:fixed;bottom:100px;right:28px;
+  background:var(--glass-strong);
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  color:var(--text);
+  padding:12px 18px;border-radius:14px;font-size:13px;font-weight:500;
+  z-index:200;animation:toastIn .35s var(--ease-bounce);max-width:340px;
+  box-shadow:var(--glass-shadow-lg);
+  border:1px solid var(--glass-border);
+}
+@keyframes toastIn{from{transform:translateY(24px) scale(.94);opacity:0}to{transform:none;opacity:1}}
 
 /* SETTINGS specifics */
 .setting-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
@@ -322,15 +747,50 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .setting-label{font-size:14px;font-weight:500}
 .setting-desc{font-size:11px;color:var(--text2);margin-top:2px}
 
-/* AUTH SCREEN */
-.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg3)}
-.auth-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px 32px;max-width:380px;width:100%;box-shadow:var(--shadow-lg)}
-.auth-logo{font-size:42px;text-align:center;margin-bottom:6px}
-.auth-title{font-size:24px;font-weight:700;text-align:center;letter-spacing:-.01em}
-.auth-sub{font-size:13px;color:var(--text2);text-align:center;margin-top:6px;margin-bottom:24px}
-.auth-tabs{display:flex;gap:2px;background:var(--bg3);border-radius:var(--radius);padding:3px;margin-bottom:20px}
-.auth-tabs button{flex:1;padding:8px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--text2);border-radius:6px;cursor:pointer}
-.auth-tabs button.active{background:var(--bg);color:var(--text);box-shadow:var(--shadow)}
+/* AUTH SCREEN — liquid glass card on royal halo background */
+.auth-screen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  position:relative;
+}
+.auth-screen::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60vw 50vh at 20% 30%, rgba(3,70,148,.18), transparent 60%),
+    radial-gradient(ellipse 50vw 40vh at 80% 70%, rgba(0,245,255,.10), transparent 60%);
+}
+.auth-box{
+  position:relative;
+  background:var(--glass-strong);
+  backdrop-filter:blur(40px) saturate(200%);
+  -webkit-backdrop-filter:blur(40px) saturate(200%);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-xl);padding:40px 36px;max-width:400px;width:100%;
+  box-shadow:var(--glass-shadow-lg), 0 0 60px rgba(3,70,148,.12);
+  animation:authIn .6s var(--ease-bounce);
+}
+@keyframes authIn{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:none}}
+.auth-logo{font-size:46px;text-align:center;margin-bottom:8px;filter:drop-shadow(0 4px 12px rgba(3,70,148,.20))}
+.auth-title{
+  font-size:28px;font-weight:700;text-align:center;letter-spacing:-.02em;
+  background:linear-gradient(135deg,var(--royal-deep),var(--royal),var(--royal-light));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.auth-sub{font-size:13px;color:var(--text2);text-align:center;margin-top:8px;margin-bottom:28px;line-height:1.5}
+.auth-tabs{
+  display:flex;gap:4px;
+  background:rgba(10,31,68,.05);
+  border-radius:12px;padding:4px;margin-bottom:22px;
+}
+.auth-tabs button{
+  flex:1;padding:9px;border:none;background:transparent;
+  font-size:13px;font-weight:500;color:var(--text2);
+  border-radius:9px;transition:all .3s var(--ease);
+}
+.auth-tabs button.active{
+  background:var(--cream-bright);color:var(--royal);font-weight:600;
+  box-shadow:0 2px 8px rgba(10,31,68,.10);
+}
+[data-theme="dark"] .auth-tabs button.active{background:rgba(255,255,255,.10);color:var(--cream-bright)}
 .auth-msg{padding:10px 12px;border-radius:var(--radius);font-size:12px;margin-bottom:12px}
 .auth-msg.err{background:var(--red-bg);color:var(--red-text)}
 .auth-msg.ok{background:var(--teal-bg);color:var(--teal-text)}
@@ -356,13 +816,17 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 </head>
 <body>
 
-<!-- SPLASH SCREEN — shown instantly, hidden after init -->
-<div id="splash" style="position:fixed;inset:0;background:#f1f0ec;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;transition:opacity .3s">
-  <div style="font-size:60px;line-height:1">🧭</div>
-  <div style="font-size:24px;font-weight:700;margin-top:10px;color:#1a1a18;letter-spacing:-.01em">Atlas</div>
-  <div style="font-size:12px;color:#6b6b68;margin-top:4px">Держи курс</div>
-  <div style="margin-top:24px;width:22px;height:22px;border:2.5px solid #e0dfd9;border-top-color:#378ADD;border-radius:50%;animation:atlasSpin .8s linear infinite"></div>
-  <style>@keyframes atlasSpin{to{transform:rotate(360deg)}}</style>
+<!-- SPLASH SCREEN — instant render before anything else -->
+<div id="splash" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9999;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;transition:opacity .5s cubic-bezier(.16,1,.3,1);background:radial-gradient(ellipse at center,#fbf7ed 0%,#f3ede0 100%)">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60vw 50vh at 20% 30%,rgba(3,70,148,.15),transparent 60%),radial-gradient(ellipse 50vw 40vh at 80% 70%,rgba(0,245,255,.10),transparent 60%);pointer-events:none"></div>
+  <div style="position:relative;font-size:64px;line-height:1;filter:drop-shadow(0 6px 18px rgba(3,70,148,.25));animation:splashLogo 1.4s cubic-bezier(.16,1,.3,1) infinite alternate">🧭</div>
+  <div style="position:relative;font-size:30px;font-weight:700;margin-top:12px;background:linear-gradient(135deg,#0a1f44,#034694,#1e3a8a);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.02em">Atlas</div>
+  <div style="position:relative;font-size:13px;color:rgba(10,31,68,.55);margin-top:4px;font-weight:500;letter-spacing:.02em">Держи курс</div>
+  <div style="position:relative;margin-top:28px;width:24px;height:24px;border:2.5px solid rgba(10,31,68,.12);border-top-color:#034694;border-right-color:#00f5ff;border-radius:50%;animation:atlasSpin .8s linear infinite"></div>
+  <style>
+    @keyframes atlasSpin{to{transform:rotate(360deg)}}
+    @keyframes splashLogo{from{transform:scale(1) rotate(-2deg)}to{transform:scale(1.05) rotate(2deg)}}
+  </style>
 </div>
 
 <!-- AUTH SCREEN (shown until user signs in or chooses guest mode) -->
@@ -454,6 +918,20 @@ function timePlus(start, durMin){
   const [h,m] = start.split(':').map(Number);
   const total = h*60+m+durMin;
   return `${pad(Math.floor(total/60)%24)}:${pad(total%60)}`;
+}
+function timeDiff(start, end){
+  if(!start || !end) return 60;
+  const [sh,sm] = start.split(':').map(Number);
+  const [eh,em] = end.split(':').map(Number);
+  const d = (eh*60+em) - (sh*60+sm);
+  return d > 0 ? d : 60;
+}
+function eventDur(e){ return e.end ? timeDiff(e.start, e.end) : (e.dur || 60); }
+function eventEnd(e){ return e.end || timePlus(e.start, e.dur || 60); }
+function fmtDur(min){
+  if(min < 60) return min+'м';
+  const h = Math.floor(min/60), m = min%60;
+  return h+'ч'+(m?(' '+m+'м'):'');
 }
 function escHTML(s){
   if(s==null) return '';
@@ -626,6 +1104,73 @@ function cat(id){
 }
 
 /* ============================================================
+   RECURRENCE — Google-Calendar-style repeat expansion
+   ============================================================ */
+function expandRepeats(item, fromKey, toKey){
+  /* item.repeat: 'none'|'daily'|'weekdays'|'weekly'|'biweekly'|'monthly'|'yearly' */
+  const repeat = item.repeat || 'none';
+  const startKey = item.date || item.deadline;
+  if(!startKey) return [];
+  const start = parseKey(startKey);
+  const from  = parseKey(fromKey);
+  const to    = parseKey(toKey);
+  if(repeat==='none'){
+    if(startKey >= fromKey && startKey <= toKey) return [{...item, _occursOn:startKey}];
+    return [];
+  }
+  const out = [];
+  let d = new Date(start);
+  if(d > to) return out;
+  /* fast-forward to fromKey if needed */
+  const step = {
+    daily:1, weekdays:1, weekly:7, biweekly:14, monthly:30, yearly:365
+  }[repeat] || 1;
+  if(d < from){
+    /* approximate jump then walk */
+    const diff = Math.floor((from - d) / 86400000);
+    const jump = Math.max(0, Math.floor(diff / step) - 1);
+    if(jump > 0) d = addDays(d, jump * step);
+  }
+  let guard = 0;
+  while(d <= to && guard++ < 500){
+    let include = false;
+    if(repeat==='daily') include = true;
+    else if(repeat==='weekdays'){ const wd = d.getDay(); include = wd>=1 && wd<=5; }
+    else if(repeat==='weekly')   include = ((d-start)/86400000) % 7 === 0;
+    else if(repeat==='biweekly') include = ((d-start)/86400000) % 14 === 0;
+    else if(repeat==='monthly')  include = d.getDate()===start.getDate();
+    else if(repeat==='yearly')   include = d.getDate()===start.getDate() && d.getMonth()===start.getMonth();
+    if(include && d >= from){
+      out.push({...item, _occursOn: dkey(d)});
+    }
+    d = addDays(d, 1);
+  }
+  return out;
+}
+
+/* Unified getter: events + tasks that have time+date, expanded for repeats */
+function getCalendarItemsForRange(fromKey, toKey){
+  const items = [];
+  DB.events.forEach(e => {
+    expandRepeats(e, fromKey, toKey).forEach(inst => items.push({...inst, _kind:'event'}));
+  });
+  DB.tasks.forEach(t => {
+    if(t.deadline && t.deadlineTime){
+      const tDur = t.durationMin || 30;
+      const start = t.deadlineTime;
+      const end = timePlus(start, tDur);
+      const synth = {...t, date:t.deadline, start, end, cat:t.cat||DB.categories[0]?.id, repeat:t.repeat||'none'};
+      expandRepeats(synth, fromKey, toKey).forEach(inst => items.push({...inst, _kind:'task'}));
+    }
+  });
+  return items;
+}
+function getCalendarItemsForDate(k){ return getCalendarItemsForRange(k, k); }
+function getCalendarItemsForHour(k, hr){
+  return getCalendarItemsForDate(k).filter(it => parseInt(it.start.split(':')[0])===hr);
+}
+
+/* ============================================================
    TABS
    ============================================================ */
 const TABS = [
@@ -721,13 +1266,13 @@ function renderMonth(){
     const k = dkey(day);
     const outside = day.getMonth()!==month;
     const isToday = k===tk;
-    const events = DB.events.filter(e => e.date===k).sort((a,b)=>a.start.localeCompare(b.start));
-    const shown = events.slice(0,3);
-    const extra = events.length - shown.length;
+    const items = getCalendarItemsForDate(k).sort((a,b)=>a.start.localeCompare(b.start));
+    const shown = items.slice(0,3);
+    const extra = items.length - shown.length;
     html += `<div class="mg-day ${outside?'outside':''} ${isToday?'today':''}" onclick="onMonthCellClick('${k}')">
       <div class="mg-num">${day.getDate()}</div>
       <div class="mg-events">
-        ${shown.map(e => `<div class="mg-event cat-${cat(e.cat).color} ${e.done?'done-ev':''}" onclick="event.stopPropagation();openEventModal('${e.id}')" title="${escHTML(e.title)}">${e.start} ${escHTML(e.title)}</div>`).join('')}
+        ${shown.map(it => calItemMonthHTML(it)).join('')}
         ${extra>0?`<div class="mg-more">+ ещё ${extra}</div>`:''}
       </div>
     </div>`;
@@ -736,6 +1281,52 @@ function renderMonth(){
   document.getElementById('cal-body').innerHTML = html;
 }
 function onMonthCellClick(k){ calDate = parseKey(k); calView = 'day'; renderCalendar(); }
+
+function calItemMonthHTML(it){
+  const c = cat(it.cat);
+  const isTask = it._kind==='task';
+  const doneCls = (isTask && it.done) ? 'done-ev' : '';
+  const repeatBadge = it.repeat && it.repeat!=='none' ? '↻' : '';
+  const kindIcon = isTask ? '✓' : '';
+  const click = isTask
+    ? `event.stopPropagation();openTaskModal('${it.id}')`
+    : `event.stopPropagation();openEventModal('${it.id}')`;
+  return `<div class="mg-event cat-${c.color} ${doneCls}" onclick="${click}" title="${escHTML(it.title)} (${it.start}–${it.end||eventEnd(it)})">${repeatBadge}${kindIcon?kindIcon+' ':''}${it.start} ${escHTML(it.title)}</div>`;
+}
+function calItemWeekHTML(it, top, height){
+  const c = cat(it.cat);
+  const isTask = it._kind==='task';
+  const doneCls = (isTask && it.done) ? 'done-ev' : '';
+  const click = isTask
+    ? `event.stopPropagation();openTaskModal('${it.id}')`
+    : `event.stopPropagation();openEventModal('${it.id}')`;
+  const repeatBadge = it.repeat && it.repeat!=='none' ? '<span style="opacity:.7">↻ </span>' : '';
+  const taskIcon = isTask ? `<span style="font-weight:700;opacity:.8;margin-right:3px">${it.done?'✓':'☐'}</span>` : '';
+  return `<div class="wg-event cat-${c.color} ${doneCls}" style="top:${top}px;height:${height}px" onclick="${click}">
+    <div style="font-weight:600">${taskIcon}${repeatBadge}${escHTML(it.title)}</div>
+    ${height>34?`<div style="font-size:9px;opacity:.75">${it.start}—${it.end||eventEnd(it)}</div>`:''}
+  </div>`;
+}
+function calItemDayHTML(it){
+  const c = cat(it.cat);
+  const isTask = it._kind==='task';
+  const doneCls = (isTask && it.done) ? 'done-ev' : '';
+  const click = isTask
+    ? `openTaskModal('${it.id}')`
+    : `openEventModal('${it.id}')`;
+  const dur = it.end ? timeDiff(it.start, it.end) : eventDur(it);
+  const taskCheck = isTask ?
+    `<div class="task-check ${it.done?'checked':''}" onclick="event.stopPropagation();toggleTask('${it.id}');renderCalendar()" style="margin-right:4px">${it.done?'✓':''}</div>` : '';
+  const repeatBadge = it.repeat && it.repeat!=='none' ? ' · ↻ повторяется' : '';
+  return `<div class="day-event cat-${c.color} ${doneCls}" onclick="${click}">
+    ${taskCheck}
+    <div class="day-event-time">${it.start}<br><span style="font-weight:500;color:var(--text2)">— ${it.end||eventEnd(it)}</span></div>
+    <div class="day-event-body">
+      <div class="day-event-title">${isTask?'✓ ':''}${escHTML(it.title)}</div>
+      <div class="day-event-meta">${escHTML(c.name)} · ${fmtDur(dur)}${repeatBadge}${it.note?' · '+escHTML(it.note):''}</div>
+    </div>
+  </div>`;
+}
 
 function renderWeek(){
   const sw = startOfWeek(calDate);
@@ -753,16 +1344,14 @@ function renderWeek(){
     html += `<div class="wg-time"><span>${hr}:00</span></div>`;
     days.forEach(d => {
       const k = dkey(d);
-      const evs = DB.events.filter(e => e.date===k && parseInt(e.start.split(':')[0])===hr);
+      const items = getCalendarItemsForHour(k, hr);
       html += `<div class="wg-cell" onclick="openEventModal(null,'${k}','${hr}')">`;
-      evs.forEach(e => {
-        const [eh,em] = e.start.split(':').map(Number);
-        const top = (em/60)*52;
-        const height = Math.max((e.dur/60)*52, 18);
-        html += `<div class="wg-event cat-${cat(e.cat).color} ${e.done?'done-ev':''}" style="top:${top}px;height:${height}px" onclick="event.stopPropagation();openEventModal('${e.id}')">
-          <div style="font-weight:600">${escHTML(e.title)}</div>
-          ${height>32?`<div style="font-size:9px;opacity:.75">${e.dur>=60?Math.floor(e.dur/60)+'ч'+(e.dur%60?e.dur%60+'м':''):e.dur+'м'}</div>`:''}
-        </div>`;
+      items.forEach(it => {
+        const [eh,em] = it.start.split(':').map(Number);
+        const dur = it.end ? timeDiff(it.start, it.end) : eventDur(it);
+        const top = (em/60)*54;
+        const height = Math.max((dur/60)*54, 20);
+        html += calItemWeekHTML(it, top, height);
       });
       html += `</div>`;
     });
@@ -773,22 +1362,20 @@ function renderWeek(){
 
 function renderDay(){
   const k = dkey(calDate);
-  const events = DB.events.filter(e => e.date===k).sort((a,b)=>a.start.localeCompare(b.start));
+  const items = getCalendarItemsForDate(k).sort((a,b)=>a.start.localeCompare(b.start));
   let html = `<div class="day-view">`;
-  if(!events.length){
-    html += `<div class="empty">На этот день ничего не запланировано<br><br><button class="btn-primary" onclick="openEventModal(null,'${k}')">+ Добавить событие</button></div>`;
+  if(!items.length){
+    html += `<div class="empty">На этот день ничего не запланировано<br><br>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:6px">
+        <button class="btn-primary" onclick="openEventModal(null,'${k}')">+ Событие</button>
+        <button class="btn-secondary" onclick="openTaskModal(null,'${k}')">+ Задача</button>
+      </div></div>`;
   } else {
-    events.forEach(e => {
-      const c = cat(e.cat);
-      html += `<div class="day-event cat-${c.color} ${e.done?'done-ev':''}" onclick="openEventModal('${e.id}')">
-        <div class="day-event-time">${e.start}<br><span style="font-weight:400;color:var(--text3)">${e.dur} мин</span></div>
-        <div class="day-event-body">
-          <div class="day-event-title">${escHTML(e.title)}</div>
-          <div class="day-event-meta">${escHTML(c.name)}${e.note?' · '+escHTML(e.note):''}</div>
-        </div>
-      </div>`;
-    });
-    html += `<button class="btn-secondary" style="margin-top:8px;width:100%" onclick="openEventModal(null,'${k}')">+ Добавить</button>`;
+    items.forEach(it => { html += calItemDayHTML(it); });
+    html += `<div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn-secondary" style="flex:1" onclick="openEventModal(null,'${k}')">+ Событие</button>
+      <button class="btn-secondary" style="flex:1" onclick="openTaskModal(null,'${k}')">+ Задача</button>
+    </div>`;
   }
   html += `</div>`;
   document.getElementById('cal-body').innerHTML = html;
@@ -798,10 +1385,15 @@ function openEventModal(id, dateOverride, hourOverride){
   let ev = id ? DB.events.find(e => e.id===id) : null;
   const isNew = !ev;
   if(isNew){
+    const start = hourOverride!=null?`${pad(hourOverride)}:00`:'19:00';
     ev = {id:uid(),title:'',date:dateOverride||todayKey(),
-          start:hourOverride!=null?`${pad(hourOverride)}:00`:'19:00',
-          dur:60,cat:DB.categories[0]?.id||'personal',note:'',done:false};
+          start,end:timePlus(start,60),
+          cat:DB.categories[0]?.id||'personal',note:'',
+          repeat:'none', reminder:''};
   }
+  /* Migrate dur → end for old events */
+  if(!ev.end && ev.dur){ ev.end = timePlus(ev.start, ev.dur); }
+  if(!ev.end) ev.end = timePlus(ev.start, 60);
   showModal(`
     <h3>${isNew?'Новое событие':'Событие'} <button class="modal-close" onclick="closeModal()">×</button></h3>
     <div class="field"><label>Название</label>
@@ -814,12 +1406,34 @@ function openEventModal(id, dateOverride, hourOverride){
     </div>
     <div class="field-row">
       <div class="field"><label>Начало</label><input type="time" id="ev-start" value="${ev.start}"></div>
-      <div class="field"><label>Длительность (мин)</label><input type="number" id="ev-dur" value="${ev.dur}" min="5" step="5"></div>
+      <div class="field"><label>Конец</label><input type="time" id="ev-end" value="${ev.end}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Повтор</label>
+        <select id="ev-repeat">
+          <option value="none"     ${(ev.repeat||'none')==='none'?'selected':''}>Не повторяется</option>
+          <option value="daily"    ${ev.repeat==='daily'?'selected':''}>Каждый день</option>
+          <option value="weekdays" ${ev.repeat==='weekdays'?'selected':''}>По будням (пн-пт)</option>
+          <option value="weekly"   ${ev.repeat==='weekly'?'selected':''}>Каждую неделю</option>
+          <option value="biweekly" ${ev.repeat==='biweekly'?'selected':''}>Каждые 2 недели</option>
+          <option value="monthly"  ${ev.repeat==='monthly'?'selected':''}>Каждый месяц</option>
+          <option value="yearly"   ${ev.repeat==='yearly'?'selected':''}>Каждый год</option>
+        </select>
+      </div>
+      <div class="field"><label>Напоминание</label>
+        <select id="ev-reminder">
+          <option value=""   ${!ev.reminder?'selected':''}>Без напоминания</option>
+          <option value="0"  ${ev.reminder==='0'?'selected':''}>В момент начала</option>
+          <option value="5"  ${ev.reminder==='5'?'selected':''}>За 5 минут</option>
+          <option value="15" ${ev.reminder==='15'?'selected':''}>За 15 минут</option>
+          <option value="30" ${ev.reminder==='30'?'selected':''}>За 30 минут</option>
+          <option value="60" ${ev.reminder==='60'?'selected':''}>За 1 час</option>
+          <option value="1440" ${ev.reminder==='1440'?'selected':''}>За день</option>
+        </select>
+      </div>
     </div>
     <div class="field"><label>Заметка</label>
       <textarea id="ev-note" placeholder="Любые детали">${escHTML(ev.note||'')}</textarea></div>
-    ${!isNew?`<div class="field"><label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:13px;font-weight:500;cursor:pointer">
-      <input type="checkbox" id="ev-done" ${ev.done?'checked':''} style="width:auto"> Выполнено</label></div>`:''}
     <div class="modal-btns">
       ${!isNew?`<button class="btn-danger" onclick="deleteEvent('${ev.id}')">Удалить</button>`:''}
       <button class="btn-secondary" onclick="closeModal()">Отмена</button>
@@ -828,14 +1442,21 @@ function openEventModal(id, dateOverride, hourOverride){
   `);
 }
 function saveEvent(id, isNew){
-  const data = {id, title:document.getElementById('ev-title').value.trim()||'Без названия',
-    date:document.getElementById('ev-date').value, start:document.getElementById('ev-start').value,
-    dur:parseInt(document.getElementById('ev-dur').value)||30,
-    cat:document.getElementById('ev-cat').value, note:document.getElementById('ev-note').value,
-    done:isNew?false:document.getElementById('ev-done').checked};
+  const start = document.getElementById('ev-start').value;
+  const end = document.getElementById('ev-end').value;
+  const data = {
+    id,
+    title: document.getElementById('ev-title').value.trim()||'Без названия',
+    date:  document.getElementById('ev-date').value,
+    start, end,
+    cat:   document.getElementById('ev-cat').value,
+    note:  document.getElementById('ev-note').value,
+    repeat:document.getElementById('ev-repeat').value || 'none',
+    reminder:document.getElementById('ev-reminder').value || '',
+  };
   if(isNew) DB.events.push(data);
   else{ const i = DB.events.findIndex(e => e.id===id); if(i>=0) DB.events[i]=data; }
-  saveDB(); closeModal(); renderCalendar();
+  saveDB(); closeModal(); renderCalendar(); rescheduleNotifications();
 }
 function deleteEvent(id){
   if(!confirm('Удалить событие?')) return;
@@ -874,9 +1495,10 @@ function habitCardHTML(h, days, tk){
   const total = Object.keys(h.log||{}).length;
   const sched = scheduleSummary(h.schedule);
   const remind = (h.reminders||[]).length ? `🔔 ${h.reminders.map(r => r.time).join(', ')}` : 'без напоминаний';
+  const stats = habitStats(h);
   return `<div class="habit-card">
     <div class="habit-top">
-      <div class="habit-color" style="background:var(--${h.color||'teal'})"></div>
+      <div class="habit-color" style="background:linear-gradient(180deg,var(--${h.color||'teal'}),rgba(0,0,0,.18))"></div>
       <div class="habit-info">
         <div class="habit-name">${escHTML(h.name)}</div>
         <div class="habit-meta">
@@ -890,6 +1512,7 @@ function habitCardHTML(h, days, tk){
         <button class="btn-ghost" onclick="openHabitModal('${h.id}')" title="Редактировать">✎</button>
       </div>
     </div>
+    ${habitChartHTML(h, stats)}
     <div class="habit-grid">
       ${days.map(d => {
         const k = dkey(d);
@@ -905,6 +1528,69 @@ function habitCardHTML(h, days, tk){
         </div>`;
       }).join('')}
     </div>
+  </div>`;
+}
+
+function habitStats(h){
+  /* compute daily series from startDate (or first log) to today */
+  const today = new Date(); today.setHours(0,0,0,0);
+  let start = h.schedule?.startDate ? parseKey(h.schedule.startDate) : null;
+  if(!start){
+    const keys = Object.keys(h.log||{}).sort();
+    start = keys.length ? parseKey(keys[0]) : addDays(today, -13);
+  }
+  if(start > today) start = today;
+  const cap = h.schedule?.endDate ? parseKey(h.schedule.endDate) : today;
+  const endX = today < cap ? today : cap;
+  let scheduled = 0, done = 0;
+  const points = [];
+  let d = new Date(start);
+  while(d <= endX){
+    if(isHabitDay(h, d)){
+      scheduled++;
+      if(h.log && h.log[dkey(d)]) done++;
+    }
+    if(scheduled > 0){
+      points.push({date:dkey(d), rate: done/scheduled});
+    }
+    d = addDays(d, 1);
+  }
+  return {points, scheduled, done, rate: scheduled? done/scheduled : 0,
+          startDate: dkey(start), endDate: dkey(endX)};
+}
+
+function habitChartHTML(h, stats){
+  if(!stats.points.length) return `<div style="font-size:11px;color:var(--text3);padding:8px 0">Нет данных для графика</div>`;
+  const W = 520, H = 70, P = 8;
+  const n = stats.points.length;
+  /* pick a brand colour from the habit's category */
+  const colour = `var(--${h.color || 'teal'})`;
+  /* path */
+  const pts = stats.points.map((p, i) => {
+    const x = P + (i/Math.max(1,n-1)) * (W - 2*P);
+    const y = H - P - p.rate * (H - 2*P);
+    return [x, y];
+  });
+  const linePath = pts.map((p,i) => (i===0?'M':'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const areaPath = linePath + ` L ${pts[n-1][0].toFixed(1)} ${H-P} L ${pts[0][0].toFixed(1)} ${H-P} Z`;
+  const pct = Math.round(stats.rate*100);
+  return `<div style="margin-top:12px;background:rgba(10,31,68,.04);border-radius:12px;padding:12px 14px;border:1px solid var(--border)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+      <div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Прогресс с ${fmtDateShort(stats.startDate)}</div>
+      <div style="font-size:13px;font-weight:700;color:var(--royal)">${stats.done}/${stats.scheduled} · ${pct}%</div>
+    </div>
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:70px;display:block;overflow:visible">
+      <defs>
+        <linearGradient id="hgrad-${h.id}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="${colour}" stop-opacity=".35"/>
+          <stop offset="100%" stop-color="${colour}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <line x1="${P}" y1="${H/2}" x2="${W-P}" y2="${H/2}" stroke="rgba(10,31,68,.10)" stroke-dasharray="2 4" stroke-width="1"/>
+      <path d="${areaPath}" fill="url(#hgrad-${h.id})"/>
+      <path d="${linePath}" stroke="${colour}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${pts[n-1][0].toFixed(1)}" cy="${pts[n-1][1].toFixed(1)}" r="3.5" fill="${colour}" stroke="var(--cream-bright)" stroke-width="1.5"/>
+    </svg>
   </div>`;
 }
 
@@ -1210,11 +1896,14 @@ function toggleSubtask(tid, sid){
   if(s){ s.done = !s.done; saveDB(); renderTasks(); }
 }
 
-function openTaskModal(id){
+function openTaskModal(id, dateOverride){
   let t = id ? DB.tasks.find(x => x.id===id) : null;
   const isNew = !t;
-  if(isNew){ t = {id:uid(),title:'',list:activeTaskList,priority:'med',deadline:'',deadlineTime:'',
-    reminder:'',tags:[],subtasks:[],note:'',done:false,created:Date.now()}; }
+  if(isNew){ t = {id:uid(),title:'',list:activeTaskList||DB.taskLists[0]?.id,priority:'med',
+    deadline:dateOverride||'',deadlineTime:'',durationMin:30,
+    repeat:'none',reminder:'',remindBefore:'',
+    cat:DB.categories[0]?.id,
+    tags:[],subtasks:[],note:'',done:false,created:Date.now()}; }
   showModal(`
     <h3>${isNew?'Новая задача':'Задача'} <button class="modal-close" onclick="closeModal()">×</button></h3>
     <div class="field"><label>Что нужно сделать</label>
@@ -1224,6 +1913,12 @@ function openTaskModal(id){
       <div class="field"><label>Список</label>
         <select id="t-list">${DB.taskLists.map(l => `<option value="${l.id}" ${l.id===t.list?'selected':''}>${escHTML(l.name)}</option>`).join('')}</select>
       </div>
+      <div class="field"><label>Категория</label>
+        <select id="t-cat">${DB.categories.map(c => `<option value="${c.id}" ${c.id===(t.cat||'')?'selected':''}>${escHTML(c.name)}</option>`).join('')}</select>
+      </div>
+    </div>
+
+    <div class="field-row">
       <div class="field"><label>Приоритет</label>
         <select id="t-pri">
           <option value="high" ${t.priority==='high'?'selected':''}>!! Высокий</option>
@@ -1231,15 +1926,38 @@ function openTaskModal(id){
           <option value="low"  ${t.priority==='low'?'selected':''}>↓ Низкий</option>
         </select>
       </div>
+      <div class="field"><label>Повтор</label>
+        <select id="t-repeat">
+          <option value="none"     ${(t.repeat||'none')==='none'?'selected':''}>Не повторяется</option>
+          <option value="daily"    ${t.repeat==='daily'?'selected':''}>Каждый день</option>
+          <option value="weekdays" ${t.repeat==='weekdays'?'selected':''}>По будням (пн-пт)</option>
+          <option value="weekly"   ${t.repeat==='weekly'?'selected':''}>Каждую неделю</option>
+          <option value="biweekly" ${t.repeat==='biweekly'?'selected':''}>Каждые 2 недели</option>
+          <option value="monthly"  ${t.repeat==='monthly'?'selected':''}>Каждый месяц</option>
+          <option value="yearly"   ${t.repeat==='yearly'?'selected':''}>Каждый год</option>
+        </select>
+      </div>
     </div>
 
     <div class="field-row">
-      <div class="field"><label>Дедлайн</label><input type="date" id="t-deadline" value="${t.deadline||''}"></div>
+      <div class="field"><label>Дата</label><input type="date" id="t-deadline" value="${t.deadline||''}"></div>
       <div class="field"><label>Время</label><input type="time" id="t-deadline-time" value="${t.deadlineTime||''}"></div>
     </div>
 
-    <div class="field"><label>Напоминание (дата и время) <span style="color:var(--text3);font-weight:400;text-transform:none">— пока вкладка открыта</span></label>
-      <input type="datetime-local" id="t-reminder" value="${t.reminder||''}"></div>
+    <div class="field-row">
+      <div class="field"><label>Длительность (мин)</label><input type="number" id="t-duration" value="${t.durationMin||30}" min="5" step="5"></div>
+      <div class="field"><label>Напомнить за</label>
+        <select id="t-remind-before">
+          <option value=""   ${!t.remindBefore?'selected':''}>Не напоминать</option>
+          <option value="0"  ${t.remindBefore==='0'?'selected':''}>В момент</option>
+          <option value="5"  ${t.remindBefore==='5'?'selected':''}>За 5 мин</option>
+          <option value="15" ${t.remindBefore==='15'?'selected':''}>За 15 мин</option>
+          <option value="30" ${t.remindBefore==='30'?'selected':''}>За 30 мин</option>
+          <option value="60" ${t.remindBefore==='60'?'selected':''}>За 1 час</option>
+          <option value="1440" ${t.remindBefore==='1440'?'selected':''}>За день</option>
+        </select>
+      </div>
+    </div>
 
     <div class="field"><label>Теги (через запятую)</label>
       <input id="t-tags" value="${escHTML((t.tags||[]).join(', '))}" placeholder="например: важное, проект-x"></div>
@@ -1287,10 +2005,13 @@ function saveTask(id, isNew){
     id,
     title:    document.getElementById('t-title').value.trim()||'Без названия',
     list:     document.getElementById('t-list').value,
+    cat:      document.getElementById('t-cat')?.value || (DB.categories[0]?.id),
     priority: document.getElementById('t-pri').value,
     deadline: document.getElementById('t-deadline').value||'',
     deadlineTime: document.getElementById('t-deadline-time').value||'',
-    reminder: document.getElementById('t-reminder').value||'',
+    durationMin:  parseInt(document.getElementById('t-duration').value)||30,
+    repeat:   document.getElementById('t-repeat').value||'none',
+    remindBefore: document.getElementById('t-remind-before').value||'',
     tags:     document.getElementById('t-tags').value.split(',').map(s => s.trim()).filter(Boolean),
     subtasks: subs,
     note:     document.getElementById('t-note').value||'',
@@ -1299,7 +2020,10 @@ function saveTask(id, isNew){
   };
   if(isNew) DB.tasks.push(data);
   else{ const i = DB.tasks.findIndex(t => t.id===id); if(i>=0) DB.tasks[i]=data; }
-  saveDB(); closeModal(); renderTasks(); rescheduleNotifications();
+  saveDB(); closeModal();
+  if(activeTab==='tasks') renderTasks();
+  if(activeTab==='calendar') renderCalendar();
+  rescheduleNotifications();
 }
 function deleteTask(id){
   if(!confirm('Удалить задачу?')) return;
@@ -2076,10 +2800,10 @@ setInterval(rescheduleNotifications, 5*60*1000);
 window.addEventListener('focus', rescheduleNotifications);
 
 /* ============================================================
-   ПЛАН ПОДГОТОВКИ В МАГИСТРАТУРУ (шаблон)
-   Грузится по кнопке в Настройках; данные добавляются к существующим.
+   LEGACY: план магистратуры удалён по запросу пользователя.
+   Оставляю стаб VIKTOR_TEMPLATE = null чтобы старые ссылки не падали.
    ============================================================ */
-const VIKTOR_TEMPLATE = {
+const _VIKTOR_TEMPLATE_DEPRECATED = {
   categories: [
     {id:'mag-vkr',     name:'ВКР',           color:'teal'},
     {id:'mag-math',    name:'Математика',    color:'purple'},
@@ -2196,13 +2920,6 @@ const VIKTOR_TEMPLATE = {
   ],
 };
 
-function loadViktorTemplate(){
-  if(!confirm('Загрузить план подготовки в магистратуру?\n\n• 47 событий в календарь\n• 32 задачи в новый список «🎓 Магистратура»\n• 8 напоминаний\n• 2 привычки\n• 7 категорий\n\nТекущие данные НЕ пострадают.')) return;
-  applyTemplateCore(VIKTOR_TEMPLATE);
-  toast('✓ План подготовки загружен');
-  showTab(activeTab);
-}
-
 function applyTemplateCore(tpl){
   (tpl.categories||[]).forEach(c => { if(!DB.categories.find(x => x.id===c.id)) DB.categories.push(c); });
   let listId = DB.taskLists[0]?.id || 'inbox';
@@ -2210,9 +2927,16 @@ function applyTemplateCore(tpl){
     if(!DB.taskLists.find(x => x.id===tpl.taskList.id)) DB.taskLists.push(tpl.taskList);
     listId = tpl.taskList.id;
   }
-  (tpl.events||[]).forEach(e => DB.events.push({...e, id:uid(), done:false, note:e.note||''}));
+  (tpl.events||[]).forEach(e => {
+    /* Normalise dur → end for new event schema */
+    const end = e.end || (e.dur ? timePlus(e.start, e.dur) : timePlus(e.start, 60));
+    DB.events.push({...e, end, dur:undefined, id:uid(), note:e.note||'', repeat:e.repeat||'none', reminder:e.reminder||''});
+  });
   (tpl.tasks||[]).forEach(t => DB.tasks.push({...t, id:uid(), list:listId,
-    deadline:t.deadline||'', deadlineTime:'', reminder:'', tags:[], subtasks:[], note:t.note||'', done:false, created:Date.now()}));
+    deadline:t.deadline||'', deadlineTime:t.deadlineTime||'', durationMin:t.durationMin||30,
+    repeat:t.repeat||'none', remindBefore:t.remindBefore||'',
+    cat:t.cat||DB.categories[0]?.id,
+    tags:t.tags||[], subtasks:[], note:t.note||'', done:false, created:Date.now()}));
   (tpl.reminders||[]).forEach(r => DB.reminders.push({...r, id:uid(), list:DB.reminderLists[0]?.id||'main',
     repeat:r.repeat||'none', note:r.note||'', done:false, created:Date.now()}));
   (tpl.habits||[]).forEach(h => DB.habits.push({...h, id:uid(), log:{}}));
@@ -2249,9 +2973,10 @@ function buildStrengthTemplate(){
     sessions.forEach(s => {
       events.push({
         date: dateFromOffset(start, w*7 + s.wd),
-        start: '19:00', dur: 75,
+        start: '19:00', end: '20:15',
         title: `${s.name} · ${weekTitle[w]}`,
         cat: 'tpl-strength', note: s.hint,
+        repeat:'none',
       });
     });
   }
@@ -2267,6 +2992,10 @@ function buildStrengthTemplate(){
       {title:'Купить пояс / магнезию / напульсники',              cat:'tpl-strength', priority:'low'},
       {title:'Сделать фото «до» (спереди, сбоку, сзади)',         cat:'tpl-strength', priority:'med', deadline:dateFromOffset(start,0)},
       {title:'Замерить веса в конце цикла',                       cat:'tpl-strength', priority:'med', deadline:dateFromOffset(start,28)},
+      /* time-blocked daily task — отображается в календаре + чекбокс */
+      {title:'Растяжка 10 минут',  cat:'tpl-mobility', priority:'med',
+       deadline:dateFromOffset(start,0), deadlineTime:'22:00', durationMin:10,
+       repeat:'daily', remindBefore:'5'},
     ],
     reminders: [
       {title:'💪 Сегодня тренировка!', date:dateFromOffset(start,0), time:'18:30'},
@@ -2303,12 +3032,14 @@ function buildHalfMarathonTemplate(){
     [7,1,5,'Лёгкая'],[7,3,5,'Темп'],[7,6,21.1,'ЗАБЕГ 🏁'],
   ];
   plan.forEach(([w,d,km,kind]) => {
+    const durMin = Math.max(30, Math.round(km*6));
     events.push({
       date: dateFromOffset(start, w*7+d),
-      start: '07:30', dur: Math.max(30, Math.round(km*6)),
+      start: '07:30', end: timePlus('07:30', durMin),
       title: `🏃 ${km} км — ${kind}`,
       cat: kind==='ЗАБЕГ 🏁' ? 'tpl-mile' : 'tpl-run',
       note: kind==='Длинная' ? 'Спокойный темп, можно говорить во время бега' : '',
+      repeat:'none',
     });
   });
   return {
@@ -2323,6 +3054,10 @@ function buildHalfMarathonTemplate(){
       {title:'Купить новые кроссовки (бегать минимум 50 км)', cat:'tpl-run', priority:'high', deadline:dateFromOffset(start,7)},
       {title:'Сдать анализы (общий, ЭКГ перед нагрузкой)', cat:'tpl-mile', priority:'med', deadline:dateFromOffset(start,3)},
       {title:'Скачать приложение для трекинга бега', cat:'tpl-run', priority:'low', deadline:dateFromOffset(start,0)},
+      /* daily timed mini-task */
+      {title:'Растяжка 15 минут после бега',  cat:'tpl-run', priority:'med',
+       deadline:dateFromOffset(start,0), deadlineTime:'08:30', durationMin:15,
+       repeat:'weekdays', remindBefore:'0'},
     ],
     reminders: [
       {title:'🏁 ПОЛУМАРАФОН — день забега!', date:dateFromOffset(start,55), time:'06:00'},
@@ -2346,17 +3081,23 @@ function buildEnglishTemplate(){
     categories: [{id:'tpl-eng',name:'🇬🇧 Английский', color:'amber'}],
     taskList: {id:'tpl-eng-list',name:'🇬🇧 Английский', color:'amber'},
     events: [
-      {date:dateFromOffset(start,14), start:'19:00', dur:60, title:'🇬🇧 Чекпоинт #1 — пройти словарный тест', cat:'tpl-eng', note:'Цель: 500 новых слов за 2 недели'},
-      {date:dateFromOffset(start,30), start:'19:00', dur:60, title:'🇬🇧 Чекпоинт #2 — диалог с носителем (italki)', cat:'tpl-eng'},
-      {date:dateFromOffset(start,45), start:'19:00', dur:60, title:'🇬🇧 Чекпоинт #3 — посмотреть фильм без субтитров', cat:'tpl-eng'},
-      {date:dateFromOffset(start,60), start:'19:00', dur:90, title:'🇬🇧 Финал — IELTS Mock Test', cat:'tpl-eng', note:'Полный тест 2.5 часа, оценить уровень'},
+      {date:dateFromOffset(start,14), start:'19:00', end:'20:00', title:'🇬🇧 Чекпоинт #1 — словарный тест', cat:'tpl-eng', note:'Цель: 500 новых слов за 2 недели'},
+      {date:dateFromOffset(start,30), start:'19:00', end:'20:00', title:'🇬🇧 Чекпоинт #2 — диалог с носителем (italki)', cat:'tpl-eng'},
+      {date:dateFromOffset(start,45), start:'19:00', end:'20:00', title:'🇬🇧 Чекпоинт #3 — фильм без субтитров', cat:'tpl-eng'},
+      {date:dateFromOffset(start,60), start:'19:00', end:'20:30', title:'🇬🇧 Финал — IELTS Mock Test', cat:'tpl-eng', note:'Полный тест 2.5 часа'},
     ],
     tasks: [
       {title:'Скачать Anki + колоду 1000 most common', cat:'tpl-eng', priority:'high', deadline:dateFromOffset(start,0)},
       {title:'Подписаться на BBC Learning English / Spotify', cat:'tpl-eng', priority:'med', deadline:dateFromOffset(start,1)},
-      {title:'Найти буддиного speaking partner (italki / Tandem)', cat:'tpl-eng', priority:'med', deadline:dateFromOffset(start,7)},
+      {title:'Найти speaking partner (italki / Tandem)', cat:'tpl-eng', priority:'med', deadline:dateFromOffset(start,7)},
       {title:'Выучить 1000 слов', cat:'tpl-eng', priority:'high', deadline:dateFromOffset(start,60)},
-      {title:'Прочитать одну книгу на английском', cat:'tpl-eng', priority:'med', deadline:dateFromOffset(start,60)},
+      /* daily timed tasks visible in calendar */
+      {title:'Anki — повторение',     cat:'tpl-eng', priority:'high',
+       deadline:dateFromOffset(start,0), deadlineTime:'08:00', durationMin:30,
+       repeat:'daily', remindBefore:'5'},
+      {title:'Подкаст на английском', cat:'tpl-eng', priority:'med',
+       deadline:dateFromOffset(start,0), deadlineTime:'19:00', durationMin:30,
+       repeat:'daily', remindBefore:'5'},
     ],
     reminders: [
       {title:'🇬🇧 Время повторить Anki', date:dateFromOffset(start,0), time:'08:00', repeat:'daily'},
@@ -2382,8 +3123,8 @@ function buildReadingTemplate(){
     categories: [{id:'tpl-read',name:'📚 Чтение', color:'purple'}],
     taskList: {id:'tpl-read-list',name:'📚 Книжный клуб', color:'purple'},
     events: [
-      {date:dateFromOffset(start,0),  start:'21:00', dur:30, title:'📚 Старт — выбрать первую книгу', cat:'tpl-read'},
-      {date:dateFromOffset(start,30), start:'21:00', dur:60, title:'📚 Финал — написать рецензии на прочитанное', cat:'tpl-read'},
+      {date:dateFromOffset(start,0),  start:'21:00', end:'21:30', title:'📚 Старт — выбрать первую книгу', cat:'tpl-read'},
+      {date:dateFromOffset(start,30), start:'21:00', end:'22:00', title:'📚 Финал — рецензии на прочитанное', cat:'tpl-read'},
     ],
     tasks: [
       {title:'Составить список из 4 книг на 30 дней', cat:'tpl-read', priority:'high', deadline:dateFromOffset(start,0)},
@@ -2391,6 +3132,9 @@ function buildReadingTemplate(){
       {title:'Книга 2 (Дни 8–14)', cat:'tpl-read', priority:'med', deadline:dateFromOffset(start,14)},
       {title:'Книга 3 (Дни 15–22)', cat:'tpl-read', priority:'med', deadline:dateFromOffset(start,22)},
       {title:'Книга 4 (Дни 23–30)', cat:'tpl-read', priority:'med', deadline:dateFromOffset(start,30)},
+      {title:'30 минут чтения',  cat:'tpl-read', priority:'high',
+       deadline:dateFromOffset(start,0), deadlineTime:'21:30', durationMin:30,
+       repeat:'daily', remindBefore:'5'},
     ],
     reminders: [],
     habits: [
@@ -2414,17 +3158,21 @@ function buildHealthTemplate(){
     ],
     taskList: {id:'tpl-health-list',name:'🥗 Здоровье', color:'green'},
     events: [
-      {date:dateFromOffset(start,0), start:'19:00', dur:60, title:'🛒 Закупка по списку на неделю', cat:'tpl-health'},
-      {date:dateFromOffset(start,7), start:'19:00', dur:60, title:'🛒 Закупка по списку на неделю', cat:'tpl-health'},
-      {date:dateFromOffset(start,14),start:'19:00', dur:60, title:'🛒 Закупка по списку на неделю', cat:'tpl-health'},
-      {date:dateFromOffset(start,21),start:'19:00', dur:60, title:'🛒 Закупка по списку на неделю', cat:'tpl-health'},
-      {date:dateFromOffset(start,28),start:'10:00', dur:30, title:'⚖️ Финальное взвешивание + замеры', cat:'tpl-health'},
+      {date:dateFromOffset(start,0),  start:'19:00', end:'20:00', title:'🛒 Закупка по списку на неделю', cat:'tpl-health', repeat:'weekly'},
+      {date:dateFromOffset(start,28), start:'10:00', end:'10:30', title:'⚖️ Финальное взвешивание + замеры', cat:'tpl-health'},
     ],
     tasks: [
       {title:'Купить весы кухонные + напольные', cat:'tpl-health', priority:'high', deadline:dateFromOffset(start,2)},
       {title:'Составить список разрешённых/запрещённых продуктов', cat:'tpl-health', priority:'high', deadline:dateFromOffset(start,0)},
       {title:'Подписаться на 3 простых здоровых рецепта в Telegram', cat:'tpl-health', priority:'low'},
       {title:'Узнать свою норму калорий и БЖУ', cat:'tpl-health', priority:'med', deadline:dateFromOffset(start,1)},
+      /* daily timed tasks */
+      {title:'Стакан воды натощак', cat:'tpl-health', priority:'high',
+       deadline:dateFromOffset(start,0), deadlineTime:'07:00', durationMin:5,
+       repeat:'daily', remindBefore:'0'},
+      {title:'Подготовить обед на завтра', cat:'tpl-health', priority:'med',
+       deadline:dateFromOffset(start,0), deadlineTime:'22:00', durationMin:20,
+       repeat:'daily', remindBefore:'15'},
     ],
     reminders: [
       {title:'💧 Стакан воды натощак', date:dateFromOffset(start,0), time:'07:00', repeat:'daily'},
@@ -2454,13 +3202,6 @@ function buildHealthTemplate(){
    ГАЛЕРЕЯ ШАБЛОНОВ
    ============================================================ */
 const TEMPLATES = [
-  {
-    id:'magistratura', icon:'🎓',
-    name:'План подготовки в магистратуру',
-    desc:'47 событий, 32 задачи, 8 напоминаний, 2 привычки. Июнь–август 2026: ВКР, Stepik, математика, кейсы, экзамены ВШЭ/ИТМО/МИФИ.',
-    badge:'Фиксированные даты 2026',
-    apply: loadViktorTemplate,
-  },
   {
     id:'strength', icon:'💪',
     name:'Силовая 5/3/1 (4 недели)',
@@ -2740,14 +3481,49 @@ async function subscribeRealtime(){
    INIT
    ============================================================ */
 async function init(){
-  /* Wait up to 5s for Supabase SDK (deferred, async) */
+  /* Optimistic UI: if there is a local Supabase session token + cached DB,
+     enter the app immediately with cached data and refresh in background. */
+  const sbLocalKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+  const localHasData = !!localStorage.getItem(STORAGE_KEY);
+  if(sbLocalKey && localHasData){
+    try{
+      const tok = JSON.parse(localStorage.getItem(sbLocalKey));
+      if(tok && (tok.user || (tok.currentSession && tok.currentSession.user))){
+        currentUser = tok.user || tok.currentSession.user;
+      }
+    }catch(e){}
+    enterApp();   /* show UI immediately */
+    /* Background: wire Supabase, sync, subscribe */
+    (async () => {
+      const ok = await waitForSupabase(8000);
+      if(!ok) return;
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      try{
+        const { data: { session } } = await sb.auth.getSession();
+        if(session){
+          currentUser = session.user;
+          await loadFromCloud();
+          if(activeTab) showTab(activeTab);
+          subscribeRealtime();
+        } else {
+          /* Token revoked server-side → drop back to auth screen */
+          location.reload();
+        }
+      }catch(e){ console.warn('Background auth refresh failed', e); }
+      sb.auth.onAuthStateChange((event) => {
+        if(event==='SIGNED_OUT'){ location.reload(); }
+      });
+    })();
+    return;
+  }
+
+  /* Cold path: no cached session — wait for SDK then check */
   const sdkReady = await waitForSupabase(5000);
   if(sdkReady){
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   } else {
-    console.warn('Supabase SDK not loaded after 5s — guest mode');
     hideSplash();
-    showAuthScreenWithMsg('Облачная синхронизация недоступна (медленный интернет?). Можно работать без аккаунта.');
+    showAuthScreenWithMsg('Облачная синхронизация недоступна. Можно работать без аккаунта.');
     return;
   }
   try{
@@ -2760,7 +3536,6 @@ async function init(){
       document.getElementById('auth-screen').style.display = 'flex';
     }
   } catch(e){
-    console.error('Auth check failed', e);
     hideSplash();
     showAuthScreenWithMsg('Не удалось подключиться к серверу. Попробуй обновить страницу или войди как гость.');
   }

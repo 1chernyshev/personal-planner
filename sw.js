@@ -1,15 +1,19 @@
 /* Atlas Service Worker — offline + instant load */
-const CACHE = 'atlas-v3';
+const CACHE = 'atlas-v5';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon.svg',
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE).then(cache =>
+      /* Cache local assets — if external (Supabase SDK) fails, don't break install */
+      Promise.all(ASSETS.map(url => cache.add(url).catch(() => null)))
+    ).then(() => self.skipWaiting())
   );
 });
 

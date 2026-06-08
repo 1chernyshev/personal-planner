@@ -1,0 +1,21 @@
+{
+  "name": "Atlas — держи курс",
+  "short_name": "Atlas",
+  "description": "Календарь, привычки, задачи, пространство и напоминания в одном месте.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f0ec",
+  "theme_color": "#378ADD",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "lang": "ru",
+  "categories": ["productivity", "lifestyle", "utilities"]
+}
